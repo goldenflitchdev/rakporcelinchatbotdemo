@@ -1,0 +1,33 @@
+╔══════════════════════════════════════════════════════════════╗
+║  RAK Porcelain Customer Support Chatbot - Installation      ║
+╚══════════════════════════════════════════════════════════════╝
+
+QUICK INSTALL (4 STEPS):
+
+1. Install dependencies:
+   $ npm install
+
+2. Set up environment:
+   $ cp .env.example .env.local
+   (Edit .env.local and add your OpenAI API key)
+
+3. Index the website (takes 15-30 min):
+   $ npm run index
+
+4. Start the app:
+   $ npm run dev
+   Open http://localhost:3000
+
+VERIFY YOUR SETUP:
+   $ npm run verify
+
+DOCUMENTATION:
+   - START_HERE.md         ← Start here!
+   - GETTING_STARTED.md    ← Full setup guide
+   - README.md             ← Complete documentation
+   - QUICKSTART.md         ← Quick reference
+
+NEED HELP?
+   Check the documentation files or open a GitHub issue.
+
+Built with Next.js 15 + OpenAI + ChromaDB
