@@ -4,12 +4,11 @@
   "private": true,
   "scripts": {
     "dev": "next dev --turbopack",
-    "build": "next build --turbopack",
+    "build": "next build",
     "start": "next start",
     "index": "tsx scripts/crawl-and-index.ts",
     "verify": "tsx scripts/verify-setup.ts",
-    "seed:real": "tsx scripts/seed-real-rak-data.ts",
-    "postbuild": "npm run seed:real"
+    "seed:real": "tsx scripts/seed-real-rak-data.ts"
   },
   "dependencies": {
     "@chroma-core/default-embed": "^0.1.8",

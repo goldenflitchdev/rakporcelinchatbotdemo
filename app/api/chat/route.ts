@@ -3,6 +3,7 @@ import { getOpenAIClient, createEmbedding } from '@/lib/openai';
 import { queryChunks } from '@/lib/chroma';
 import { SYSTEM_PROMPT, createUserPromptWithContext } from '@/lib/prompts';
 import { CHAT_MODEL, TOP_K, TEMPERATURE } from '@/lib/config';
+import { ensureSeeded } from '@/lib/ensure-seeded';
 
 export const runtime = 'nodejs';
 export const dynamic = 'force-dynamic';
@@ -18,6 +19,9 @@ interface ChatRequest {
 
 export async function POST(req: NextRequest) {
   try {
+    // Ensure vector database is seeded (only runs once on first request)
+    await ensureSeeded();
+
     const body: ChatRequest = await req.json();
     const { messages } = body;
 
