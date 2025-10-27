@@ -10,6 +10,7 @@
     "verify": "tsx scripts/verify-setup.ts"
   },
   "dependencies": {
+    "@chroma-core/default-embed": "^0.1.8",
     "@radix-ui/react-accordion": "^1.2.12",
     "@radix-ui/react-collapsible": "^1.1.12",
     "@radix-ui/react-scroll-area": "^1.2.10",
