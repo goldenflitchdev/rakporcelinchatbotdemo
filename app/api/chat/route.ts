@@ -7,6 +7,7 @@ import { ensureSeeded } from '@/lib/ensure-seeded';
 
 export const runtime = 'nodejs';
 export const dynamic = 'force-dynamic';
+export const maxDuration = 30; // Maximum duration in seconds for Vercel serverless function
 
 interface Message {
   role: 'user' | 'assistant' | 'system';
