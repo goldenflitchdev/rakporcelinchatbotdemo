@@ -1,0 +1,12 @@
+{
+  "buildCommand": "npm run build",
+  "functions": {
+    "app/api/**/*.ts": {
+      "maxDuration": 30
+    }
+  },
+  "env": {
+    "OPENAI_API_KEY": "@openai-api-key"
+  }
+}
+
