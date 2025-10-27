@@ -38,7 +38,13 @@ export async function queryChunks(
   topK: number = 8
 ): Promise<Array<{ id: string; content: string; metadata: DocumentChunk['metadata']; score: number }>> {
   const store = getVectorStore();
-  return store.query(queryEmbedding, topK);
+  const results = store.query(queryEmbedding, topK);
+  
+  // Cast metadata to correct type since we control what goes into the store
+  return results.map(result => ({
+    ...result,
+    metadata: result.metadata as DocumentChunk['metadata']
+  }));
 }
 
 export async function getCollectionStats(): Promise<{
