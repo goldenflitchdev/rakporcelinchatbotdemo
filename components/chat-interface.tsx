@@ -238,105 +238,92 @@ export function ChatInterface() {
                     </div>
                   ) : (
                     <div className="space-y-3">
-                      {message.isStreaming ? (
-                        <div className="flex items-center gap-2">
-                          <div className="flex gap-1">
-                            <span className="w-2 h-2 bg-[rgb(164,120,100)] dark:bg-[rgb(184,140,120)] rounded-full animate-bounce" style={{ animationDelay: '0ms' }}></span>
-                            <span className="w-2 h-2 bg-[rgb(164,120,100)] dark:bg-[rgb(184,140,120)] rounded-full animate-bounce" style={{ animationDelay: '150ms' }}></span>
-                            <span className="w-2 h-2 bg-[rgb(164,120,100)] dark:bg-[rgb(184,140,120)] rounded-full animate-bounce" style={{ animationDelay: '300ms' }}></span>
+                      {/* Assistant text with typewriter effect */}
+                      <div className="space-y-4">
+                        <div className="text-[15px] leading-relaxed text-gray-800 dark:text-gray-200">
+                          <StreamingText
+                            text={message.content}
+                            speed={20}
+                            isStreaming={!!message.isStreaming}
+                            className="text-[15px] leading-relaxed"
+                          />
+                        </div>
+                        {message.isStreaming && (
+                          <div className="flex items-center gap-2">
+                            <div className="flex gap-1">
+                              <span className="w-2 h-2 bg-[rgb(164,120,100)] dark:bg-[rgb(184,140,120)] rounded-full animate-bounce" style={{ animationDelay: '0ms' }}></span>
+                              <span className="w-2 h-2 bg-[rgb(164,120,100)] dark:bg-[rgb(184,140,120)] rounded-full animate-bounce" style={{ animationDelay: '150ms' }}></span>
+                              <span className="w-2 h-2 bg-[rgb(164,120,100)] dark:bg-[rgb(184,140,120)] rounded-full animate-bounce" style={{ animationDelay: '300ms' }}></span>
+                            </div>
+                          </div>
+                        )}
+                      </div>
+
+                      {/* Product Thumbnails - Show even while typing */}
+                      {message.products && message.products.length > 0 && (
+                        <div className="pt-4 mt-4 space-y-3 animate-in fade-in duration-500">
+                          <p className="text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wide">
+                            Featured Products ({message.products.length})
+                          </p>
+                          <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-3">
+                            {message.products.map((product, idx) => (
+                              <a
+                                key={idx}
+                                href={product.productUrl}
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                className="group block rounded-2xl border border-gray-200 dark:border-gray-700 overflow-hidden hover:border-[rgb(164,120,100)] dark:hover:border-[rgb(184,140,120)] hover:shadow-lg transition-all duration-200"
+                              >
+                                <div className="aspect-square bg-gray-100 dark:bg-gray-800 relative overflow-hidden">
+                                  <img
+                                    src={product.imageUrl}
+                                    alt={product.name}
+                                    className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-200"
+                                    onError={(e) => {
+                                      const target = e.target as HTMLImageElement;
+                                      target.src = 'data:image/svg+xml,%3Csvg xmlns="http://www.w3.org/2000/svg" width="200" height="200"%3E%3Crect fill="%23f3f4f6" width="200" height="200"/%3E%3Ctext x="50%25" y="50%25" dominant-baseline="middle" text-anchor="middle" font-family="sans-serif" font-size="14" fill="%239ca3af"%3ENo Image%3C/text%3E%3C/svg%3E';
+                                    }}
+                                  />
+                                </div>
+                                <div className="p-2">
+                                  <p className="text-xs font-medium text-gray-900 dark:text-gray-100 truncate">
+                                    {product.name}
+                                  </p>
+                                  {product.code && (
+                                    <p className="text-[10px] text-gray-500 dark:text-gray-400 truncate">
+                                      {product.code}
+                                    </p>
+                                  )}
+                                </div>
+                              </a>
+                            ))}
                           </div>
                         </div>
-                      ) : (
-                        <>
-                          <div className="space-y-4">
-                            {message.isStreaming ? (
-                              <div className="text-[15px] leading-relaxed text-gray-800 dark:text-gray-200">
-                                <StreamingText
-                                  text={message.content}
-                                  speed={20}
-                                  isStreaming={message.isStreaming}
-                                  className="text-[15px] leading-relaxed"
-                                />
-                              </div>
-                            ) : (
-                              message.content.split('\n\n').map((paragraph, idx) => (
-                                <p 
-                                  key={idx}
-                                  className="text-[15px] leading-relaxed text-gray-800 dark:text-gray-200 m-0"
-                                >
-                                  {paragraph}
-                                </p>
-                              ))
-                            )}
+                      )}
+
+                      {/* Sources */}
+                      {message.sources && message.sources.length > 0 && (
+                        <div className="pt-3 mt-3 border-t border-gray-200 dark:border-gray-700">
+                          <p className="text-xs font-medium text-gray-500 dark:text-gray-400 mb-2 uppercase tracking-wide">
+                            Sources
+                          </p>
+                          <div className="flex flex-wrap gap-2">
+                            {message.sources.map((source, idx) => (
+                              <a
+                                key={idx}
+                                href={source}
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                className="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs rounded-full bg-[rgba(164,120,100,0.1)] dark:bg-[rgba(184,140,120,0.15)] text-[rgb(144,100,80)] dark:text-[rgb(184,140,120)] hover:bg-[rgba(164,120,100,0.2)] dark:hover:bg-[rgba(184,140,120,0.25)] transition-colors group"
+                              >
+                                <ExternalLink className="w-3 h-3 group-hover:scale-110 transition-transform" />
+                                <span className="max-w-[200px] truncate">
+                                  {new URL(source).pathname.split('/').pop() || 'Source'}
+                                </span>
+                              </a>
+                            ))}
                           </div>
-
-                          {/* Product Thumbnails - Show even while typing */}
-                          {message.products && message.products.length > 0 && (
-                            <div className="pt-4 mt-4 space-y-3 animate-in fade-in duration-500">
-                              <p className="text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wide">
-                                Featured Products ({message.products.length})
-                              </p>
-                              <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-3">
-                                {message.products.map((product, idx) => (
-                                  <a
-                                    key={idx}
-                                    href={product.productUrl}
-                                    target="_blank"
-                                    rel="noopener noreferrer"
-                                    className="group block rounded-2xl border border-gray-200 dark:border-gray-700 overflow-hidden hover:border-[rgb(164,120,100)] dark:hover:border-[rgb(184,140,120)] hover:shadow-lg transition-all duration-200"
-                                  >
-                                    <div className="aspect-square bg-gray-100 dark:bg-gray-800 relative overflow-hidden">
-                                      <img
-                                        src={product.imageUrl}
-                                        alt={product.name}
-                                        className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-200"
-                                        onError={(e) => {
-                                          const target = e.target as HTMLImageElement;
-                                          target.src = 'data:image/svg+xml,%3Csvg xmlns="http://www.w3.org/2000/svg" width="200" height="200"%3E%3Crect fill="%23f3f4f6" width="200" height="200"/%3E%3Ctext x="50%25" y="50%25" dominant-baseline="middle" text-anchor="middle" font-family="sans-serif" font-size="14" fill="%239ca3af"%3ENo Image%3C/text%3E%3C/svg%3E';
-                                        }}
-                                      />
-                                    </div>
-                                    <div className="p-2">
-                                      <p className="text-xs font-medium text-gray-900 dark:text-gray-100 truncate">
-                                        {product.name}
-                                      </p>
-                                      {product.code && (
-                                        <p className="text-[10px] text-gray-500 dark:text-gray-400 truncate">
-                                          {product.code}
-                                        </p>
-                                      )}
-                                    </div>
-                                  </a>
-                                ))}
-                              </div>
-                            </div>
-                          )}
-
-                          {/* Sources */}
-                          {message.sources && message.sources.length > 0 && (
-                            <div className="pt-3 mt-3 border-t border-gray-200 dark:border-gray-700">
-                              <p className="text-xs font-medium text-gray-500 dark:text-gray-400 mb-2 uppercase tracking-wide">
-                                Sources
-                              </p>
-                              <div className="flex flex-wrap gap-2">
-                                {message.sources.map((source, idx) => (
-                                  <a
-                                    key={idx}
-                                    href={source}
-                                    target="_blank"
-                                    rel="noopener noreferrer"
-                                    className="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs rounded-full bg-[rgba(164,120,100,0.1)] dark:bg-[rgba(184,140,120,0.15)] text-[rgb(144,100,80)] dark:text-[rgb(184,140,120)] hover:bg-[rgba(164,120,100,0.2)] dark:hover:bg-[rgba(184,140,120,0.25)] transition-colors group"
-                                  >
-                                    <ExternalLink className="w-3 h-3 group-hover:scale-110 transition-transform" />
-                                    <span className="max-w-[200px] truncate">
-                                      {new URL(source).pathname.split('/').pop() || 'Source'}
-                                    </span>
-                                  </a>
-                                ))}
-                              </div>
-                            </div>
-                          )}
-                        </>
+                        </div>
                       )}
                     </div>
                   )}
