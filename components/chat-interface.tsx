@@ -808,7 +808,7 @@ export function ChatInterface() {
                 type="button"
                 onClick={() => fileInputRef.current?.click()}
                 disabled={isLoading || isAnalyzingImage}
-                className="flex-shrink-0 p-3 text-gray-600 hover:text-[rgb(164,120,100)] hover:bg-[rgba(164,120,100,0.1)] rounded-full transition-all"
+                className="flex-shrink-0 p-2.5 text-gray-600 hover:text-[rgb(164,120,100)] hover:bg-[rgba(164,120,100,0.1)] rounded-full transition-all"
                 title="Upload image to find similar products"
               >
                 <ImageIcon className="w-5 h-5" />
@@ -820,11 +820,11 @@ export function ChatInterface() {
                 onChange={(e) => setInput(e.target.value)}
                 onKeyDown={handleKeyDown}
                 placeholder={uploadedImage ? "Describe what you're looking for (optional)..." : "Ask me anything about RAK Porcelain..."}
-                className="flex-1 resize-none bg-transparent px-6 py-3 text-[15px] text-gray-900 placeholder:text-gray-400 focus:outline-none border-0 leading-relaxed scrollbar-hide"
+                className="flex-1 resize-none bg-transparent px-6 py-2.5 text-[15px] text-gray-900 placeholder:text-gray-400 focus:outline-none border-0 leading-relaxed scrollbar-hide"
                 rows={1}
                 disabled={isLoading || isAnalyzingImage}
                 style={{
-                  minHeight: '24px',
+                  minHeight: '20px',
                   maxHeight: '200px',
                   outline: 'none',
                   boxShadow: 'none',
@@ -833,7 +833,7 @@ export function ChatInterface() {
                 }}
                 onInput={(e) => {
                   const target = e.target as HTMLTextAreaElement;
-                  target.style.height = '24px';
+                  target.style.height = '20px';
                   target.style.height = target.scrollHeight + 'px';
                 }}
               />
@@ -841,7 +841,7 @@ export function ChatInterface() {
                 type="submit"
                 disabled={(isLoading || isAnalyzingImage) || (!input.trim() && !uploadedImage)}
                 className={cn(
-                  "flex-shrink-0 px-5 py-3 rounded-full transition-all duration-200 inline-flex items-center gap-2",
+                  "flex-shrink-0 px-5 py-2.5 rounded-full transition-all duration-200 inline-flex items-center gap-2",
                   (isLoading || isAnalyzingImage) || (!input.trim() && !uploadedImage)
                     ? "bg-gray-200 text-gray-400 cursor-not-allowed"
                     : "bg-[rgb(164,120,100)] hover:bg-[rgb(144,100,80)] text-white shadow-lg shadow-[rgba(164,120,100,0.3)] hover:shadow-xl hover:shadow-[rgba(164,120,100,0.4)] hover:scale-105"
