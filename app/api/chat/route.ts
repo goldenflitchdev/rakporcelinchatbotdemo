@@ -14,6 +14,7 @@ import {
 import { analyzeQuery, buildSmartDatabaseQuery } from '@/lib/query-analyzer';
 import { query as dbQuery } from '@/lib/postgres';
 import { searchByAesthetic } from '@/lib/aesthetic-vector-store';
+import { getResponseCache } from '@/lib/response-cache';
 
 export const runtime = 'nodejs';
 export const dynamic = 'force-dynamic';
@@ -57,46 +58,52 @@ export async function POST(req: NextRequest) {
 
     const userQuery = lastUserMessage.content;
 
-    // Step 1: Use AI to analyze query deeply
-    console.log('🧠 AI analyzing user query...');
-    const queryAnalysis = await analyzeQuery(userQuery);
-    console.log(`   Intent: ${queryAnalysis.userIntent}`);
-    console.log(`   Strategy: ${queryAnalysis.searchStrategy}`);
-    console.log(`   Suggested: "${queryAnalysis.suggestedQuery}"`);
+    // Check cache first for instant responses
+    const cache = getResponseCache();
+    const cached = cache.get(userQuery);
     
-    let products: ProductResult[] = [];
+    if (cached) {
+      console.log('⚡ Returning cached response (instant!)');
+      return NextResponse.json({
+        message: cached.message,
+        sources: cached.sources,
+        products: cached.products,
+        cached: true,
+      });
+    }
 
-    // Step 2: Search based on AI analysis
-    const productIntent = await detectProductIntent(userQuery);
+    // PARALLEL PROCESSING FOR SPEED - Run everything at once!
+    console.log('⚡ Starting parallel operations...');
     
+    const [queryAnalysis, queryEmbedding, productIntent] = await Promise.all([
+      analyzeQuery(userQuery),                    // AI query analysis
+      createEmbedding(userQuery),                 // Create embedding
+      detectProductIntent(userQuery),             // Detect product intent
+    ]);
+
+    console.log(`🧠 Analysis: ${queryAnalysis.userIntent} (${queryAnalysis.searchStrategy})`);
+    
+    // Now search for products and context in parallel
+    let products: ProductResult[] = [];
+    let relevantChunksPromise = queryChunks(queryEmbedding, TOP_K);
+    
+    // Product search (run while context search is happening)
     if (productIntent.hasProductIntent || queryAnalysis.confidence > 0.6) {
-      console.log('🔍 Product search initiated...');
-      
-      // Use AI-suggested query for smarter search
       const searchTerm = queryAnalysis.suggestedQuery || productIntent.searchTerm || userQuery;
       
-      // SMART HIERARCHICAL SEARCH with AI guidance
       if (productIntent.collection) {
-        console.log(`🎨 Collection: ${productIntent.collection}`);
         products = await getProductsByCollection(productIntent.collection, 5);
       } else if (productIntent.category) {
-        console.log(`📂 Category: ${productIntent.category}`);
         products = await getProductsByCategory(productIntent.category, 5);
       } else {
-        console.log(`🔍 AI-guided search: "${searchTerm}"`);
         products = await searchProducts(searchTerm, 5);
       }
       
-      console.log(`✅ Displaying ${products.length} products`);
+      console.log(`✅ ${products.length} products found`);
     }
 
-    // Step 2: Create embedding for the user query
-    console.log('Creating embedding for query:', userQuery);
-    const queryEmbedding = await createEmbedding(userQuery);
-
-    // Step 2: Query ChromaDB for relevant chunks
-    console.log('Querying ChromaDB for relevant chunks...');
-    const relevantChunks = await queryChunks(queryEmbedding, TOP_K);
+    // Get context results
+    const relevantChunks = await relevantChunksPromise;
 
     if (relevantChunks.length === 0) {
       return NextResponse.json({
@@ -180,6 +187,9 @@ When user asks follow-up questions like "what about...", "tell me more", "and...
     const sources = Array.from(
       new Set(relevantChunks.map(chunk => chunk.metadata.url))
     ).slice(0, 3); // Limit to top 3 sources
+
+    // Cache the response for future instant replies
+    cache.set(userQuery, assistantMessage, sources, products.length > 0 ? products : undefined);
 
     return NextResponse.json({
       message: assistantMessage,
