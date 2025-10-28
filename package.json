@@ -13,8 +13,7 @@
     "db:sync": "tsx scripts/sync-database.ts",
     "db:schedule": "tsx scripts/nightly-updater.ts",
     "db:build-aesthetic": "tsx scripts/build-aesthetic-db.ts",
-    "db:analyze-aesthetics": "tsx scripts/analyze-product-aesthetics.ts",
-    "db:count": "tsx scripts/count-products.ts"
+    "db:analyze-aesthetics": "tsx scripts/analyze-product-aesthetics.ts"
   },
   "dependencies": {
     "@chroma-core/default-embed": "^0.1.8",

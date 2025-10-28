@@ -12,7 +12,7 @@ export interface StreamingTextProps {
 
 export function StreamingText({
   text,
-  speed = 30,
+  speed = 20,
   onComplete,
   isStreaming = false,
   className = '',
@@ -21,7 +21,6 @@ export function StreamingText({
   const indexRef = useRef(0);
   const previousTextRef = useRef('');
   const intervalRef = useRef<NodeJS.Timeout | null>(null);
-  const lastCompletedTextRef = useRef<string>('');
 
   useEffect(() => {
     // If text changed (new chunk arrived in streaming mode)
@@ -58,9 +57,8 @@ export function StreamingText({
           if (intervalRef.current) {
             clearInterval(intervalRef.current);
           }
-          // Fire completion callback (even in streaming mode) once per text
-          if (onComplete && lastCompletedTextRef.current !== text) {
-            lastCompletedTextRef.current = text;
+          
+          if (onComplete && !isStreaming) {
             onComplete();
           }
         }
@@ -68,10 +66,6 @@ export function StreamingText({
     } else if (!isStreaming) {
       // Text is already fully displayed
       setDisplayedText(text);
-      if (onComplete && lastCompletedTextRef.current !== text) {
-        lastCompletedTextRef.current = text;
-        onComplete();
-      }
     }
 
     return () => {

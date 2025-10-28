@@ -14,15 +14,7 @@
   --font-sans: var(--font-red-hat);
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #1f1f1f;
-    --foreground: #e8eaed;
-    --accent: rgb(184, 140, 120);
-    --accent-hover: rgb(164, 120, 100);
-    --accent-light: rgba(184, 140, 120, 0.15);
-  }
-}
+/* Dark mode disabled - enforce light theme only */
 
 * {
   -webkit-font-smoothing: antialiased;
