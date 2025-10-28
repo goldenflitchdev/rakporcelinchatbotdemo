@@ -679,7 +679,7 @@ export function ChatInterface() {
                 onChange={(e) => setInput(e.target.value)}
                 onKeyDown={handleKeyDown}
                 placeholder={uploadedImage ? "Describe what you're looking for (optional)..." : "Ask me anything about RAK Porcelain..."}
-                className="flex-1 resize-none bg-transparent px-6 py-3 text-[15px] text-gray-900 placeholder:text-gray-400 focus:outline-none border-0 leading-relaxed"
+                className="flex-1 resize-none bg-transparent px-6 py-3 text-[15px] text-gray-900 placeholder:text-gray-400 focus:outline-none border-0 leading-relaxed scrollbar-hide"
                 rows={1}
                 disabled={isLoading || isAnalyzingImage}
                 style={{
@@ -687,6 +687,8 @@ export function ChatInterface() {
                   maxHeight: '200px',
                   outline: 'none',
                   boxShadow: 'none',
+                  scrollbarWidth: 'none',
+                  msOverflowStyle: 'none',
                 }}
                 onInput={(e) => {
                   const target = e.target as HTMLTextAreaElement;
