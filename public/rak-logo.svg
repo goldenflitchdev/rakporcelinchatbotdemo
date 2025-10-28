@@ -1,0 +1,22 @@
+<svg width="120" height="120" viewBox="0 0 120 120" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <!-- Crown icon with RAK branding -->
+  <g transform="translate(20, 25)">
+    <!-- Crown base -->
+    <path d="M10 50 L10 55 L70 55 L70 50 Z" fill="#A47864"/>
+    
+    <!-- Crown points -->
+    <path d="M5 35 L15 50 L25 35 L35 50 L45 35 L55 50 L65 35 L75 50 L75 55 L5 55 Z" fill="#A47864"/>
+    
+    <!-- Crown peaks -->
+    <circle cx="15" cy="30" r="4" fill="#A47864"/>
+    <circle cx="35" cy="30" r="4" fill="#A47864"/>
+    <circle cx="55" cy="30" r="4" fill="#A47864"/>
+    
+    <!-- RAK Text -->
+    <text x="40" y="25" font-family="Arial, sans-serif" font-size="16" font-weight="bold" fill="#A47864" text-anchor="middle">RAK</text>
+  </g>
+  
+  <!-- Circular background -->
+  <circle cx="60" cy="60" r="58" fill="none" stroke="#A47864" stroke-width="2" opacity="0.2"/>
+</svg>
+

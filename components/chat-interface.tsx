@@ -4,6 +4,7 @@ import { useState, useRef, useEffect } from 'react';
 import { Send, Loader2, AlertCircle, Sparkles, User, Tag, ChevronDown, ChevronUp, Image as ImageIcon, X } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { StreamingText } from './streaming-text';
+import Image from 'next/image';
 
 interface ProductCard {
   id: number;
@@ -270,8 +271,14 @@ export function ChatInterface() {
         <div className="max-w-5xl mx-auto flex items-center justify-between">
           <div className="flex items-center gap-3">
             <div className="relative">
-              <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-[rgb(164,120,100)] to-[rgb(144,100,80)] flex items-center justify-center shadow-lg">
-                <Sparkles className="w-5 h-5 text-white" strokeWidth={2.5} />
+              <div className="w-10 h-10 rounded-xl bg-white flex items-center justify-center shadow-lg border border-gray-200">
+                <Image 
+                  src="/rak-logo.svg" 
+                  alt="RAK Porcelain" 
+                  width={32} 
+                  height={32}
+                  className="w-8 h-8"
+                />
               </div>
               <div className="absolute -bottom-1 -right-1 w-3 h-3 bg-green-500 rounded-full border-2 border-white"></div>
             </div>
@@ -294,8 +301,14 @@ export function ChatInterface() {
           {showWelcome && messages.length === 0 && (
             <div className="space-y-8 animate-in fade-in duration-700">
               <div className="text-center space-y-4 py-12">
-                <div className="inline-flex items-center justify-center w-20 h-20 rounded-3xl bg-gradient-to-br from-[rgb(164,120,100)] to-[rgb(144,100,80)] shadow-2xl mb-4">
-                  <Sparkles className="w-10 h-10 text-white" strokeWidth={2} />
+                <div className="inline-flex items-center justify-center w-20 h-20 rounded-3xl bg-white shadow-2xl mb-4 border border-gray-200">
+                  <Image 
+                    src="/rak-logo.svg" 
+                    alt="RAK Porcelain" 
+                    width={64} 
+                    height={64}
+                    className="w-16 h-16"
+                  />
                 </div>
                 <h2 className="text-4xl md:text-5xl font-bold text-gray-900 tracking-tight">
                   Hi! I'm here to help you explore RAK Porcelain
@@ -334,8 +347,14 @@ export function ChatInterface() {
               >
                 {message.role === 'assistant' && (
                   <div className="flex-shrink-0">
-                    <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-[rgb(164,120,100)] to-[rgb(144,100,80)] flex items-center justify-center shadow-lg">
-                      <Sparkles className="w-5 h-5 text-white" strokeWidth={2.5} />
+                    <div className="w-10 h-10 rounded-xl bg-white flex items-center justify-center shadow-lg border border-gray-200">
+                      <Image 
+                        src="/rak-logo.svg" 
+                        alt="RAK Porcelain" 
+                        width={32} 
+                        height={32}
+                        className="w-8 h-8"
+                      />
                     </div>
                   </div>
                 )}
