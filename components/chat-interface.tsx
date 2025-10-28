@@ -185,22 +185,22 @@ export function ChatInterface() {
   ];
 
   return (
-    <div className="flex flex-col h-screen bg-white dark:bg-[#1f1f1f]">
+    <div className="flex flex-col h-screen bg-white">
       {/* Header */}
-      <header className="border-b border-gray-200 dark:border-gray-800 px-6 md:px-8 py-4 bg-white/80 dark:bg-[#1f1f1f]/80 backdrop-blur-sm sticky top-0 z-10">
+      <header className="border-b border-gray-200 px-6 md:px-8 py-4 bg-white/80 backdrop-blur-sm sticky top-0 z-10">
         <div className="max-w-5xl mx-auto flex items-center justify-between">
           <div className="flex items-center gap-3">
             <div className="relative">
               <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-[rgb(164,120,100)] to-[rgb(144,100,80)] flex items-center justify-center shadow-lg">
                 <Sparkles className="w-5 h-5 text-white" strokeWidth={2.5} />
               </div>
-              <div className="absolute -bottom-1 -right-1 w-3 h-3 bg-green-500 rounded-full border-2 border-white dark:border-[#1f1f1f]"></div>
+              <div className="absolute -bottom-1 -right-1 w-3 h-3 bg-green-500 rounded-full border-2 border-white"></div>
             </div>
             <div>
-              <h1 className="text-lg font-semibold text-gray-900 dark:text-gray-100">
+              <h1 className="text-lg font-semibold text-gray-900">
                 RAK Porcelain Assistant
               </h1>
-              <p className="text-xs text-gray-500 dark:text-gray-400">
+              <p className="text-xs text-gray-500">
                 Always here to help
               </p>
             </div>
@@ -218,10 +218,10 @@ export function ChatInterface() {
                 <div className="inline-flex items-center justify-center w-20 h-20 rounded-3xl bg-gradient-to-br from-[rgb(164,120,100)] to-[rgb(144,100,80)] shadow-2xl mb-4">
                   <Sparkles className="w-10 h-10 text-white" strokeWidth={2} />
                 </div>
-                <h2 className="text-4xl md:text-5xl font-bold text-gray-900 dark:text-gray-100 tracking-tight">
+                <h2 className="text-4xl md:text-5xl font-bold text-gray-900 tracking-tight">
                   Hi! I'm here to help you explore RAK Porcelain
                 </h2>
-                <p className="text-xl text-gray-600 dark:text-gray-400 max-w-2xl mx-auto leading-relaxed">
+                <p className="text-xl text-gray-600 max-w-2xl mx-auto leading-relaxed">
                   Looking for the perfect porcelain pieces? I'd love to show you our collections, answer questions, or help you find exactly what you need.
                 </p>
               </div>
@@ -232,9 +232,9 @@ export function ChatInterface() {
                   <button
                     key={index}
                     onClick={() => setInput(question)}
-                    className="group p-4 text-left rounded-2xl border border-gray-200 dark:border-gray-700 hover:border-[rgb(164,120,100)] dark:hover:border-[rgb(184,140,120)] hover:bg-[rgba(164,120,100,0.05)] dark:hover:bg-[rgba(184,140,120,0.1)] transition-all duration-200 hover:shadow-md"
+                    className="group p-4 text-left rounded-2xl border border-gray-200 hover:border-[rgb(164,120,100)] hover:bg-[rgba(164,120,100,0.05)] transition-all duration-200 hover:shadow-md"
                   >
-                    <p className="text-sm text-gray-700 dark:text-gray-300 group-hover:text-[rgb(144,100,80)] dark:group-hover:text-[rgb(184,140,120)] leading-relaxed">
+                    <p className="text-sm text-gray-700 group-hover:text-[rgb(144,100,80)] leading-relaxed">
                       {question}
                     </p>
                   </button>
@@ -275,7 +275,7 @@ export function ChatInterface() {
                     <div className="space-y-3">
                       {/* Assistant text with typewriter effect */}
                       <div className="space-y-4">
-                        <div className="text-[15px] leading-relaxed text-gray-800 dark:text-gray-200">
+                        <div className="text-[15px] leading-relaxed text-gray-800">
                           <StreamingText
                             text={message.content}
                             speed={30}
@@ -303,9 +303,9 @@ export function ChatInterface() {
                         {message.isStreaming && (
                           <div className="flex items-center gap-2">
                             <div className="flex gap-1">
-                              <span className="w-2 h-2 bg-[rgb(164,120,100)] dark:bg-[rgb(184,140,120)] rounded-full animate-bounce" style={{ animationDelay: '0ms' }}></span>
-                              <span className="w-2 h-2 bg-[rgb(164,120,100)] dark:bg-[rgb(184,140,120)] rounded-full animate-bounce" style={{ animationDelay: '150ms' }}></span>
-                              <span className="w-2 h-2 bg-[rgb(164,120,100)] dark:bg-[rgb(184,140,120)] rounded-full animate-bounce" style={{ animationDelay: '300ms' }}></span>
+                              <span className="w-2 h-2 bg-[rgb(164,120,100)] rounded-full animate-bounce" style={{ animationDelay: '0ms' }}></span>
+                              <span className="w-2 h-2 bg-[rgb(164,120,100)] rounded-full animate-bounce" style={{ animationDelay: '150ms' }}></span>
+                              <span className="w-2 h-2 bg-[rgb(164,120,100)] rounded-full animate-bounce" style={{ animationDelay: '300ms' }}></span>
                             </div>
                           </div>
                         )}
