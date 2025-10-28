@@ -357,26 +357,29 @@ export function ChatInterface() {
     "Tell me about B2B options"
   ];
 
+  // Mobile: show only first 2 questions
+  const mobileSuggestedQuestions = suggestedQuestions.slice(0, 2);
+
   return (
-    <div className="flex flex-col h-screen bg-white">
+    <div className="flex flex-col h-screen bg-white overflow-hidden">
       {/* Header */}
-      <header className="border-b border-gray-200 px-6 md:px-8 py-4 bg-white/80 backdrop-blur-sm sticky top-0 z-10">
+      <header className="border-b border-gray-200 px-4 md:px-8 py-3 md:py-4 bg-white/80 backdrop-blur-sm sticky top-0 z-10">
         <div className="max-w-5xl mx-auto flex items-center justify-between">
           <div className="flex items-center gap-3">
-            <div className="w-20 h-20 flex items-center justify-center">
+            <div className="w-16 h-16 md:w-20 md:h-20 flex items-center justify-center">
               <Image 
                 src="/rak-logo.svg" 
                 alt="RAK Porcelain" 
                 width={80} 
                 height={80}
-                className="w-20 h-20"
+                className="w-16 h-16 md:w-20 md:h-20"
               />
             </div>
             <div>
-              <h1 className="text-lg font-semibold text-gray-900">
+              <h1 className="text-base md:text-lg font-semibold text-gray-900">
                 Signature Connoisseur
               </h1>
-              <p className="text-xs text-gray-500">
+              <p className="text-[10px] md:text-xs text-gray-500">
                 Your exclusive expert assistance
               </p>
             </div>
@@ -385,15 +388,15 @@ export function ChatInterface() {
       </header>
 
       {/* Messages Area */}
-      <div className="flex-1 overflow-y-auto">
-        <div className="max-w-5xl mx-auto px-6 md:px-8 py-8 pt-12">
+      <div className="flex-1 overflow-y-auto overflow-x-hidden">
+        <div className="max-w-5xl mx-auto px-4 md:px-8 py-6 md:py-8 pt-8 md:pt-12">
           {/* Welcome Screen */}
           {showWelcome && messages.length === 0 && (
             <div className="flex flex-col justify-center items-center h-full space-y-8 animate-in fade-in duration-700">
               <div className="text-center space-y-6">
                 {/* Brand Video - 1.6x size (128px * 1.6 = 204.8px ~ 52 in tailwind) */}
                 <div className="inline-flex items-center justify-center">
-                  <div className="relative w-52 h-52 rounded-full overflow-hidden">
+                  <div className="relative w-32 h-32 md:w-52 md:h-52 rounded-full overflow-hidden">
                     <video
                       autoPlay
                       loop
@@ -409,7 +412,7 @@ export function ChatInterface() {
                           alt="RAK Porcelain" 
                           width={160} 
                           height={160}
-                          className="w-40 h-40"
+                          className="w-24 h-24 md:w-40 md:h-40"
                         />
                       </div>
                     </video>
@@ -453,12 +456,12 @@ export function ChatInterface() {
                 )}
 
                 <div className={cn(
-                  "flex-1 max-w-[85%] md:max-w-[75%] space-y-3",
+                  "flex-1 max-w-[90%] md:max-w-[75%] space-y-3",
                   message.role === 'user' && 'flex justify-end'
                 )}>
                   {message.role === 'user' ? (
-                    <div className="inline-block px-6 py-4 rounded-full bg-[rgb(164,120,100)] text-white shadow-lg">
-                      <p className="text-[15px] leading-relaxed whitespace-pre-wrap break-words">
+                    <div className="inline-block px-4 md:px-6 py-3 md:py-4 rounded-full bg-[rgb(164,120,100)] text-white shadow-lg">
+                      <p className="text-sm md:text-[15px] leading-relaxed whitespace-pre-wrap break-words">
                         {message.content}
                       </p>
                     </div>
@@ -475,7 +478,7 @@ export function ChatInterface() {
                       ) : (
                         <>
                           <div className="space-y-4">
-                            <div className="text-[15px] leading-relaxed text-gray-800">
+                            <div className="text-sm md:text-[15px] leading-relaxed text-gray-800">
                               <StreamingText
                                 text={message.content}
                                 speed={20}
@@ -501,7 +504,7 @@ export function ChatInterface() {
                               <p className="text-xs font-medium text-gray-500 uppercase tracking-wide">
                                 Featured Products ({message.products.length})
                               </p>
-                              <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-3">
+                              <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-2 md:gap-3">
                                 {message.products.map((product, idx) => (
                                   <a
                                     key={idx}
@@ -510,7 +513,7 @@ export function ChatInterface() {
                                     rel="noopener noreferrer"
                                     className="group block rounded-2xl border border-gray-200 overflow-hidden hover:border-[rgb(164,120,100)] hover:shadow-lg transition-all duration-200"
                                   >
-                                    <div className="aspect-square bg-gray-100 relative overflow-hidden">
+                                    <div className="aspect-square bg-gray-100 relative overflow-hidden rounded-lg">
                                       <img
                                         src={product.imageUrl}
                                         alt={product.name}
@@ -521,12 +524,12 @@ export function ChatInterface() {
                                         }}
                                       />
                                     </div>
-                                    <div className="p-2">
-                                      <p className="text-xs font-medium text-gray-900 truncate">
+                                    <div className="p-1.5 md:p-2">
+                                      <p className="text-[10px] md:text-xs font-medium text-gray-900 truncate">
                                         {product.name}
                                       </p>
                                       {product.code && (
-                                        <p className="text-[10px] text-gray-500 truncate">
+                                        <p className="text-[8px] md:text-[10px] text-gray-500 truncate">
                                           {product.code}
                                         </p>
                                       )}
@@ -738,8 +741,8 @@ export function ChatInterface() {
       </div>
 
       {/* Input Area */}
-      <div className="bg-white/80 backdrop-blur-sm">
-        <div className="max-w-5xl mx-auto px-6 md:px-8 py-6">
+      <div className="bg-white/80 backdrop-blur-sm sticky bottom-0 md:relative">
+        <div className="max-w-5xl mx-auto px-4 md:px-8 py-4 md:py-6">
           {/* Suggested Questions - Show when welcome is visible */}
           {showWelcome && messages.length === 0 && (
             <div className="mb-6">
@@ -747,18 +750,34 @@ export function ChatInterface() {
                 Quick Start
               </p>
               <div className="flex flex-wrap gap-2">
-                {suggestedQuestions.map((question, index) => (
-                  <button
-                    key={index}
-                    onClick={() => {
-                      setInput(question);
-                      inputRef.current?.focus();
-                    }}
-                    className="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs rounded-full bg-[rgba(164,120,100,0.08)] text-[rgb(144,100,80)] hover:bg-[rgba(164,120,100,0.15)] hover:shadow-md transition-all border border-[rgba(164,120,100,0.2)]"
-                  >
-                    <span className="font-medium">{question}</span>
-                  </button>
-                ))}
+                <div className="block md:hidden">
+                  {mobileSuggestedQuestions.map((question, index) => (
+                    <button
+                      key={index}
+                      onClick={() => {
+                        setInput(question);
+                        inputRef.current?.focus();
+                      }}
+                      className="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs rounded-full bg-[rgba(164,120,100,0.08)] text-[rgb(144,100,80)] hover:bg-[rgba(164,120,100,0.15)] hover:shadow-md transition-all border border-[rgba(164,120,100,0.2)] mr-2 mb-2"
+                    >
+                      <span className="font-medium">{question}</span>
+                    </button>
+                  ))}
+                </div>
+                <div className="hidden md:flex flex-wrap gap-2">
+                  {suggestedQuestions.map((question, index) => (
+                    <button
+                      key={index}
+                      onClick={() => {
+                        setInput(question);
+                        inputRef.current?.focus();
+                      }}
+                      className="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs rounded-full bg-[rgba(164,120,100,0.08)] text-[rgb(144,100,80)] hover:bg-[rgba(164,120,100,0.15)] hover:shadow-md transition-all border border-[rgba(164,120,100,0.2)]"
+                    >
+                      <span className="font-medium">{question}</span>
+                    </button>
+                  ))}
+                </div>
               </div>
             </div>
           )}
@@ -794,7 +813,7 @@ export function ChatInterface() {
           )}
 
           <form onSubmit={handleSubmit} className="relative">
-            <div className="relative flex items-center gap-3 p-3 rounded-full border border-gray-200 focus-within:border-[rgb(164,120,100)] bg-white transition-all shadow-lg shadow-gray-200/50">
+            <div className="relative flex items-center gap-2 md:gap-3 p-2 md:p-3 rounded-full border border-gray-200 focus-within:border-[rgb(164,120,100)] bg-white transition-all shadow-lg shadow-gray-200/50">
               {/* Image Upload Button */}
               <input
                 ref={fileInputRef}
@@ -807,10 +826,10 @@ export function ChatInterface() {
                 type="button"
                 onClick={() => fileInputRef.current?.click()}
                 disabled={isLoading || isAnalyzingImage}
-                className="flex-shrink-0 p-2.5 text-gray-600 hover:text-[rgb(164,120,100)] hover:bg-[rgba(164,120,100,0.1)] rounded-full transition-all"
+                className="flex-shrink-0 p-2 md:p-2.5 text-gray-600 hover:text-[rgb(164,120,100)] hover:bg-[rgba(164,120,100,0.1)] rounded-full transition-all"
                 title="Upload image to find similar products"
               >
-                <ImageIcon className="w-5 h-5" />
+                <ImageIcon className="w-4 h-4 md:w-5 md:h-5" />
               </button>
 
               <textarea
@@ -819,7 +838,7 @@ export function ChatInterface() {
                 onChange={(e) => setInput(e.target.value)}
                 onKeyDown={handleKeyDown}
                 placeholder={uploadedImage ? "Describe what you're looking for (optional)..." : "Ask me anything about RAK Porcelain..."}
-                className="flex-1 resize-none bg-transparent px-6 py-2 text-[15px] text-gray-900 placeholder:text-gray-400 focus:outline-none border-0 leading-relaxed scrollbar-hide"
+                className="flex-1 resize-none bg-transparent px-4 md:px-6 py-2 text-sm md:text-[15px] text-gray-900 placeholder:text-gray-400 focus:outline-none border-0 leading-relaxed scrollbar-hide"
                 rows={1}
                 disabled={isLoading || isAnalyzingImage}
                 style={{
@@ -840,7 +859,7 @@ export function ChatInterface() {
                 type="submit"
                 disabled={(isLoading || isAnalyzingImage) || (!input.trim() && !uploadedImage)}
                 className={cn(
-                  "flex-shrink-0 px-5 py-2.5 rounded-full transition-all duration-200 inline-flex items-center gap-2",
+                  "flex-shrink-0 px-4 md:px-5 py-2 md:py-2.5 rounded-full transition-all duration-200 inline-flex items-center gap-1 md:gap-2",
                   (isLoading || isAnalyzingImage) || (!input.trim() && !uploadedImage)
                     ? "bg-gray-200 text-gray-400 cursor-not-allowed"
                     : "bg-[rgb(164,120,100)] hover:bg-[rgb(144,100,80)] text-white shadow-lg shadow-[rgba(164,120,100,0.3)] hover:shadow-xl hover:shadow-[rgba(164,120,100,0.4)] hover:scale-105"
@@ -849,19 +868,19 @@ export function ChatInterface() {
                 {(isLoading || isAnalyzingImage) ? (
                   <>
                     <Loader2 className="w-5 h-5 animate-spin" />
-                    <span className="text-sm font-medium">Analyzing...</span>
+                    <span className="text-xs md:text-sm font-medium">Analyzing...</span>
                   </>
                 ) : (
                   <>
                     <Send className="w-5 h-5" />
-                    <span className="text-sm font-medium">Send</span>
+                    <span className="text-xs md:text-sm font-medium">Send</span>
                   </>
                 )}
               </button>
             </div>
           </form>
 
-          <p className="text-xs text-center text-gray-500 mt-4 leading-relaxed">
+          <p className="hidden md:block text-xs text-center text-gray-500 mt-4 leading-relaxed">
             {uploadedImage 
               ? "Add a description to refine your search, or just click Send to find similar products" 
               : "Tip: You can paste images directly (Ctrl/Cmd + V) or click the 📷 icon to upload"}
