@@ -77,14 +77,16 @@ export function ChatInterface() {
   const handleImageSearch = async () => {
     if (!uploadedImage) return;
 
+    const userQuery = input.trim() || 'Find me similar products to this image';
+    setInput('');
     setError(null);
     setShowWelcome(false);
     setIsAnalyzingImage(true);
 
-    // Add user message with image
+    // Add user message with image and query
     setMessages(prev => [...prev, { 
       role: 'user', 
-      content: '🖼️ Uploaded an image to find similar products' 
+      content: `🖼️ ${userQuery}` 
     }]);
 
     // Add loading placeholder
@@ -100,7 +102,10 @@ export function ChatInterface() {
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify({ image: uploadedImage }),
+        body: JSON.stringify({ 
+          image: uploadedImage,
+          query: userQuery 
+        }),
       });
 
       if (!response.ok) {
@@ -673,10 +678,10 @@ export function ChatInterface() {
                 value={input}
                 onChange={(e) => setInput(e.target.value)}
                 onKeyDown={handleKeyDown}
-                placeholder={uploadedImage ? "Click send to analyze image..." : "Ask me anything about RAK Porcelain..."}
+                placeholder={uploadedImage ? "Describe what you're looking for (optional)..." : "Ask me anything about RAK Porcelain..."}
                 className="flex-1 resize-none bg-transparent px-6 py-3 text-[15px] text-gray-900 placeholder:text-gray-400 focus:outline-none border-0 leading-relaxed"
                 rows={1}
-                disabled={isLoading || isAnalyzingImage || !!uploadedImage}
+                disabled={isLoading || isAnalyzingImage}
                 style={{
                   minHeight: '24px',
                   maxHeight: '200px',
@@ -693,16 +698,22 @@ export function ChatInterface() {
                 type="submit"
                 disabled={(isLoading || isAnalyzingImage) || (!input.trim() && !uploadedImage)}
                 className={cn(
-                  "flex-shrink-0 p-3 rounded-full transition-all duration-200",
+                  "flex-shrink-0 px-5 py-3 rounded-full transition-all duration-200 inline-flex items-center gap-2",
                   (isLoading || isAnalyzingImage) || (!input.trim() && !uploadedImage)
                     ? "bg-gray-200 text-gray-400 cursor-not-allowed"
                     : "bg-[rgb(164,120,100)] hover:bg-[rgb(144,100,80)] text-white shadow-lg shadow-[rgba(164,120,100,0.3)] hover:shadow-xl hover:shadow-[rgba(164,120,100,0.4)] hover:scale-105"
                 )}
               >
                 {(isLoading || isAnalyzingImage) ? (
-                  <Loader2 className="w-5 h-5 animate-spin" />
+                  <>
+                    <Loader2 className="w-5 h-5 animate-spin" />
+                    <span className="text-sm font-medium">Analyzing...</span>
+                  </>
                 ) : (
-                  <Send className="w-5 h-5" />
+                  <>
+                    <Send className="w-5 h-5" />
+                    <span className="text-sm font-medium">Send</span>
+                  </>
                 )}
               </button>
             </div>
@@ -710,7 +721,7 @@ export function ChatInterface() {
 
           <p className="text-xs text-center text-gray-500 mt-4 leading-relaxed">
             {uploadedImage 
-              ? "Upload an image to find visually similar RAK Porcelain products" 
+              ? "Add a description to refine your search, or just click Send to find similar products" 
               : "RAK Porcelain AI Assistant can make mistakes. Check important info."}
           </p>
         </div>

@@ -41,7 +41,7 @@ Respond with JSON in this format:
 export async function POST(request: NextRequest) {
   try {
     const body = await request.json();
-    const { image } = body;
+    const { image, query } = body;
 
     if (!image) {
       return NextResponse.json(
@@ -51,6 +51,9 @@ export async function POST(request: NextRequest) {
     }
 
     console.log('🖼️  Analyzing uploaded image...');
+    if (query) {
+      console.log('📝 User query:', query);
+    }
 
     const openai = getOpenAIClient();
 
@@ -81,8 +84,10 @@ export async function POST(request: NextRequest) {
     
     console.log('✅ Image analysis:', analysis);
 
-    // Search for matching products using the analysis
-    const searchQuery = analysis.searchQuery || analysis.summary;
+    // Search for matching products using the analysis and user query
+    const searchQuery = query 
+      ? `${query}. Visual characteristics: ${analysis.searchQuery}` 
+      : (analysis.searchQuery || analysis.summary);
     console.log('🔍 Searching for:', searchQuery);
 
     // Try visual search first
@@ -157,12 +162,20 @@ export async function POST(request: NextRequest) {
       console.error('Error searching products:', error);
     }
 
+    // Generate contextual message based on query and results
+    let message = '';
+    if (query && products.length > 0) {
+      message = `Based on your request "${query}" and the image you uploaded, I found ${products.length} similar products. They match the ${analysis.aestheticStyle?.join(' and ')} aesthetic with ${analysis.colorPalette?.join(', ')} tones.`;
+    } else if (products.length > 0) {
+      message = `I analyzed your image and found ${products.length} similar products that match the ${analysis.aestheticStyle?.join(' and ')} style you're looking for.`;
+    } else {
+      message = `I analyzed your image and found it has a ${analysis.aestheticStyle?.join(' and ')} aesthetic. Let me search for similar products for you.`;
+    }
+
     return NextResponse.json({
       analysis,
       products,
-      message: products.length > 0 
-        ? `Based on your image, I found ${products.length} similar products that match the ${analysis.aestheticStyle?.join(' and ')} style you're looking for.`
-        : `I analyzed your image and found it has a ${analysis.aestheticStyle?.join(' and ')} aesthetic. Let me search for similar products for you.`
+      message
     });
 
   } catch (error: any) {
