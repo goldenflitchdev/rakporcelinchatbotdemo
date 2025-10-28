@@ -358,9 +358,11 @@ export function ChatInterface() {
   ];
 
   const [isMobile, setIsMobile] = useState(false);
+  const [isClient, setIsClient] = useState(false);
 
   // Check if mobile on mount and resize
   useEffect(() => {
+    setIsClient(true);
     const checkMobile = () => {
       setIsMobile(window.innerWidth < 768);
     };
@@ -377,10 +379,10 @@ export function ChatInterface() {
   return (
     <div className="flex flex-col h-screen bg-white overflow-hidden">
       {/* Header */}
-      <header className="border-b border-gray-200 px-4 md:px-8 py-3 md:py-4 bg-white/80 backdrop-blur-sm sticky top-0 z-10">
+      <header className="border-b border-gray-200 px-4 md:px-8 py-3 md:py-4 bg-white/80 backdrop-blur-sm sticky top-0 z-10 mobile-force">
         <div className="max-w-5xl mx-auto flex items-center justify-between">
           <div className="flex items-center gap-3">
-            <div className="w-16 h-16 md:w-20 md:h-20 flex items-center justify-center">
+            <div className="w-16 h-16 md:w-20 md:h-20 flex items-center justify-center mobile-logo">
               <Image 
                 src="/rak-logo.svg" 
                 alt="RAK Porcelain" 
@@ -410,7 +412,7 @@ export function ChatInterface() {
               <div className="text-center space-y-6">
                 {/* Brand Video - 1.6x size (128px * 1.6 = 204.8px ~ 52 in tailwind) */}
                 <div className="inline-flex items-center justify-center">
-                  <div className="relative w-32 h-32 md:w-52 md:h-52 rounded-full overflow-hidden">
+                  <div className="relative w-32 h-32 md:w-52 md:h-52 rounded-full overflow-hidden mobile-video">
                     <video
                       autoPlay
                       loop
@@ -756,7 +758,7 @@ export function ChatInterface() {
 
       {/* Input Area */}
       <div className="bg-white/80 backdrop-blur-sm sticky bottom-0 md:relative">
-        <div className="max-w-5xl mx-auto px-4 md:px-8 py-4 md:py-6">
+        <div className="max-w-5xl mx-auto px-4 md:px-8 py-4 md:py-6 mobile-force">
           {/* Suggested Questions - Show when welcome is visible */}
           {showWelcome && messages.length === 0 && (
             <div className="mb-6">
@@ -851,7 +853,7 @@ export function ChatInterface() {
                 value={input}
                 onChange={(e) => setInput(e.target.value)}
                 onKeyDown={handleKeyDown}
-                placeholder={uploadedImage ? "Describe what you're looking for (optional)..." : (isMobile ? "Ask me anything..." : "Ask me anything about RAK Porcelain...")}
+                placeholder={uploadedImage ? "Describe what you're looking for (optional)..." : (isClient && isMobile ? "Ask me anything..." : "Ask me anything about RAK Porcelain...")}
                 className="flex-1 resize-none bg-transparent px-4 md:px-6 py-2 text-sm md:text-[15px] text-gray-900 placeholder:text-gray-400 focus:outline-none border-0 leading-relaxed scrollbar-hide"
                 rows={1}
                 disabled={isLoading || isAnalyzingImage}
