@@ -658,23 +658,48 @@ ls -la data/vector-store.json
 
 ## 📜 Changelog
 
-### **[Latest] - 2025-10-28**
+### **[v1.0.2] - 2025-10-28**
+
+#### ✨ **Major UI Overhaul - Gemini-Inspired Experience**
+- Complete redesign of chat interface with Gemini-like aesthetics
+- Added beautiful welcome screen with suggested questions
+- Improved typography with Google Sans-style fonts
+- Enhanced spacing and layout (max-w-5xl for more room)
+- Better message bubbles with larger rounded corners
+- Professional gradient icons (Sparkles for AI, User icon)
+- Auto-expanding textarea input
+- Smooth fade-in and slide-in animations
+- Better loading states with "Thinking..." indicator
+- Pill-style source citation badges
+- Backdrop blur effects on header/footer
+- Custom scrollbar styling
+- Improved accessibility and focus states
+- More spacious, breathable design
+- Human-like conversational experience
 
 #### ✅ **Added**
 - Comprehensive README with full product documentation
 - Changelog section for tracking updates
 - Local testing guide with performance metrics
 - Vercel deployment troubleshooting documentation
+- Welcome screen with 4 suggested starter questions
+- Better visual feedback for all interactions
 
 #### 🔧 **Fixed**
 - TypeScript type error in `queryChunks` function
 - Vercel build configuration (removed turbopack flag)
 - Vector database seeding (now auto-seeds on first request)
+- Input field auto-focus on page load
+- Textarea height auto-adjustment
 
 #### ⚡ **Improved**
 - Build time reduced to ~1 second
 - Response time optimized to 3-5 seconds
 - Error handling enhanced across all API routes
+- UI animations feel more natural and smooth
+- Color scheme closer to professional AI assistants
+- Typography improved for better readability
+- Overall chat experience feels more human
 
 ---
 
