@@ -658,6 +658,47 @@ ls -la data/vector-store.json
 
 ## 📜 Changelog
 
+### **[v1.2.0] - 2025-10-28** 🚀
+
+#### 🧠 **AI-Powered Query Analysis (BREAKTHROUGH FEATURE)**
+- **OpenAI analyzes every query** before database search
+- Deep understanding of user intent (what they really want)
+- Extracts: collections, categories, materials, colors, finishes, shapes, aesthetics
+- Generates optimized database search queries
+- Confidence scoring (0-1) for search reliability
+- JSON-structured analysis for precise matching
+
+#### 🎨 **Aesthetic Vector Database (NEW)**
+- Specialized vector store for style/material/finish properties
+- Analyzes 1,000 products for aesthetic traits
+- **Trait extraction:**
+  - Styles: modern, classic, minimalist, elegant, rustic, contemporary
+  - Materials: porcelain, ceramic, stoneware, etc.
+  - Finishes: glossy, matte, satin, textured
+  - Colors: white, cream, black, multi-color
+  - Edge types: rolled, plain, scalloped, beaded
+  - Use cases: fine dining, casual, hotel, restaurant, home
+- Vector search matches style preferences
+- Enables queries like "elegant matte white plates" or "modern glossy black bowls"
+
+#### 🔍 **Advanced Search Capabilities**
+Now understands complex queries:
+- ✅ "I need elegant white plates for fine dining" → Aesthetic + color + use case
+- ✅ "Show me modern minimalist bowls" → Style-based matching
+- ✅ "Looking for glossy finish dinnerware" → Material finish search
+- ✅ "Rustic style serving dishes" → Aesthetic search
+- ✅ "Matte black pieces for restaurant" → Color + finish + use case
+
+#### 🆕 **New System Components**
+- `lib/query-analyzer.ts` - AI query understanding (145 lines)
+- `lib/aesthetic-vector-store.ts` - Style/material vector DB (235 lines)
+- `scripts/build-aesthetic-db.ts` - Build aesthetic index (135 lines)
+
+#### 🆕 **New Command**
+- `npm run db:build-aesthetic` - Build aesthetic vector database
+
+---
+
 ### **[v1.1.5] - 2025-10-28**
 
 #### 🎲 **Intelligent Product Variety & Smart Search**
