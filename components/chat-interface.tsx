@@ -299,38 +299,42 @@ export function ChatInterface() {
         <div className="max-w-5xl mx-auto px-6 md:px-8 py-8">
           {/* Welcome Screen */}
           {showWelcome && messages.length === 0 && (
-            <div className="space-y-8 animate-in fade-in duration-700">
-              <div className="text-center space-y-4 py-12">
-                <div className="inline-flex items-center justify-center w-20 h-20 rounded-3xl bg-white shadow-2xl mb-4 border border-gray-200">
-                  <Image 
-                    src="/rak-logo.svg" 
-                    alt="RAK Porcelain" 
-                    width={64} 
-                    height={64}
-                    className="w-16 h-16"
-                  />
+            <div className="flex flex-col justify-center items-center h-full space-y-8 animate-in fade-in duration-700">
+              <div className="text-center space-y-6">
+                {/* Brand Video */}
+                <div className="inline-flex items-center justify-center">
+                  <div className="relative w-32 h-32 rounded-full overflow-hidden shadow-2xl border-4 border-white ring-2 ring-gray-200">
+                    <video
+                      autoPlay
+                      loop
+                      muted
+                      playsInline
+                      className="w-full h-full object-cover"
+                    >
+                      <source src="/rak-brand-video.mov" type="video/mp4" />
+                      <source src="/rak-brand-video.mov" type="video/quicktime" />
+                      {/* Fallback to logo if video doesn't load */}
+                      <div className="w-full h-full bg-white flex items-center justify-center">
+                        <Image 
+                          src="/rak-logo.svg" 
+                          alt="RAK Porcelain" 
+                          width={96} 
+                          height={96}
+                          className="w-24 h-24"
+                        />
+                      </div>
+                    </video>
+                  </div>
                 </div>
-                <h2 className="text-4xl md:text-5xl font-bold text-gray-900 tracking-tight">
-                  Hi! I'm here to help you explore RAK Porcelain
-                </h2>
-                <p className="text-xl text-gray-600 max-w-2xl mx-auto leading-relaxed">
-                  Looking for the perfect porcelain pieces? I'd love to show you our collections, answer questions, or help you find exactly what you need.
-                </p>
-              </div>
-
-              {/* Suggested Questions */}
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-3 max-w-3xl mx-auto">
-                {suggestedQuestions.map((question, index) => (
-                  <button
-                    key={index}
-                    onClick={() => setInput(question)}
-                    className="group p-4 text-left rounded-2xl border border-gray-200 hover:border-[rgb(164,120,100)] hover:bg-[rgba(164,120,100,0.05)] transition-all duration-200 hover:shadow-md"
-                  >
-                    <p className="text-sm text-gray-700 group-hover:text-[rgb(144,100,80)] leading-relaxed">
-                      {question}
-                    </p>
-                  </button>
-                ))}
+                
+                <div>
+                  <h2 className="text-4xl md:text-5xl font-bold text-gray-900 tracking-tight mb-3">
+                    Hi! I'm here to help you explore RAK Porcelain
+                  </h2>
+                  <p className="text-xl text-gray-600 max-w-2xl mx-auto leading-relaxed">
+                    Looking for the perfect porcelain pieces? I'd love to show you our collections, answer questions, or help you find exactly what you need.
+                  </p>
+                </div>
               </div>
             </div>
           )}
@@ -642,6 +646,29 @@ export function ChatInterface() {
       {/* Input Area */}
       <div className="border-t border-gray-200 bg-white/80 backdrop-blur-sm">
         <div className="max-w-5xl mx-auto px-6 md:px-8 py-6">
+          {/* Suggested Questions - Show when welcome is visible */}
+          {showWelcome && messages.length === 0 && (
+            <div className="mb-4 pb-4 border-b border-gray-200">
+              <p className="text-xs font-medium text-gray-500 mb-3 uppercase tracking-wide">
+                Quick Start
+              </p>
+              <div className="flex flex-wrap gap-2">
+                {suggestedQuestions.map((question, index) => (
+                  <button
+                    key={index}
+                    onClick={() => {
+                      setInput(question);
+                      inputRef.current?.focus();
+                    }}
+                    className="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs rounded-full bg-[rgba(164,120,100,0.08)] text-[rgb(144,100,80)] hover:bg-[rgba(164,120,100,0.15)] hover:shadow-md transition-all border border-[rgba(164,120,100,0.2)]"
+                  >
+                    <span className="font-medium">{question}</span>
+                  </button>
+                ))}
+              </div>
+            </div>
+          )}
+
           {/* Image Preview */}
           {uploadedImage && (
             <div className="mb-4 p-3 bg-gray-50 rounded-2xl border border-gray-200">
