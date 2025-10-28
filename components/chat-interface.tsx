@@ -36,6 +36,51 @@ export function ChatInterface() {
   const [isTyping, setIsTyping] = useState(false);
   const dataRef = useRef<{ products?: ProductCard[] } | null>(null);
 
+  const ProductThumb = ({ product }: { product: ProductCard }) => {
+    const [loaded, setLoaded] = useState(false);
+
+    return (
+      <a
+        href={product.productUrl}
+        target="_blank"
+        rel="noopener noreferrer"
+        className="group block rounded-2xl border border-gray-200 dark:border-gray-700 overflow-hidden hover:border-[rgb(164,120,100)] dark:hover:border-[rgb(184,140,120)] hover:shadow-lg transition-all duration-200"
+        style={{ visibility: loaded ? 'visible' : 'hidden' }}
+      >
+        <div className="aspect-square bg-gray-100 dark:bg-gray-800 relative overflow-hidden">
+          {/* Skeleton placeholder shown until image loads to avoid layout shift */}
+          {!loaded && (
+            <div className="absolute inset-0 animate-pulse bg-gray-100 dark:bg-gray-800" />
+          )}
+          <img
+            src={product.imageUrl}
+            alt={product.name}
+            className={cn(
+              "w-full h-full object-cover transition-opacity duration-300",
+              loaded ? 'opacity-100' : 'opacity-0'
+            )}
+            onLoad={() => setLoaded(true)}
+            onError={(e) => {
+              const target = e.target as HTMLImageElement;
+              target.src = 'data:image/svg+xml,%3Csvg xmlns="http://www.w3.org/2000/svg" width="200" height="200"%3E%3Crect fill="%23f3f4f6" width="200" height="200"/%3E%3Ctext x="50%25" y="50%25" dominant-baseline="middle" text-anchor="middle" font-family="sans-serif" font-size="14" fill="%239ca3af"%3ENo Image%3C/text%3E%3C/svg%3E';
+              setLoaded(true);
+            }}
+          />
+        </div>
+        <div className="p-2">
+          <p className="text-xs font-medium text-gray-900 dark:text-gray-100 truncate">
+            {product.name}
+          </p>
+          {product.code && (
+            <p className="text-[10px] text-gray-500 dark:text-gray-400 truncate">
+              {product.code}
+            </p>
+          )}
+        </div>
+      </a>
+    );
+  };
+
   const scrollToBottom = () => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
   };
@@ -274,35 +319,7 @@ export function ChatInterface() {
                           </p>
                           <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-3">
                             {message.products.map((product, idx) => (
-                              <a
-                                key={idx}
-                                href={product.productUrl}
-                                target="_blank"
-                                rel="noopener noreferrer"
-                                className="group block rounded-2xl border border-gray-200 dark:border-gray-700 overflow-hidden hover:border-[rgb(164,120,100)] dark:hover:border-[rgb(184,140,120)] hover:shadow-lg transition-all duration-200"
-                              >
-                                <div className="aspect-square bg-gray-100 dark:bg-gray-800 relative overflow-hidden">
-                                  <img
-                                    src={product.imageUrl}
-                                    alt={product.name}
-                                    className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-200"
-                                    onError={(e) => {
-                                      const target = e.target as HTMLImageElement;
-                                      target.src = 'data:image/svg+xml,%3Csvg xmlns="http://www.w3.org/2000/svg" width="200" height="200"%3E%3Crect fill="%23f3f4f6" width="200" height="200"/%3E%3Ctext x="50%25" y="50%25" dominant-baseline="middle" text-anchor="middle" font-family="sans-serif" font-size="14" fill="%239ca3af"%3ENo Image%3C/text%3E%3C/svg%3E';
-                                    }}
-                                  />
-                                </div>
-                                <div className="p-2">
-                                  <p className="text-xs font-medium text-gray-900 dark:text-gray-100 truncate">
-                                    {product.name}
-                                  </p>
-                                  {product.code && (
-                                    <p className="text-[10px] text-gray-500 dark:text-gray-400 truncate">
-                                      {product.code}
-                                    </p>
-                                  )}
-                                </div>
-                              </a>
+                              <ProductThumb key={idx} product={product} />
                             ))}
                           </div>
                         </div>
