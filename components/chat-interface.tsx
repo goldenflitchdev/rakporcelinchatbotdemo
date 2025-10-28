@@ -795,7 +795,7 @@ export function ChatInterface() {
           )}
 
           <form onSubmit={handleSubmit} className="relative">
-            <div className="relative flex items-end gap-3 p-2 rounded-full border border-gray-200 focus-within:border-[rgb(164,120,100)] bg-white transition-all shadow-lg shadow-gray-200/50">
+            <div className="relative flex items-center gap-3 p-3 rounded-full border border-gray-200 focus-within:border-[rgb(164,120,100)] bg-white transition-all shadow-lg shadow-gray-200/50">
               {/* Image Upload Button */}
               <input
                 ref={fileInputRef}
@@ -820,11 +820,11 @@ export function ChatInterface() {
                 onChange={(e) => setInput(e.target.value)}
                 onKeyDown={handleKeyDown}
                 placeholder={uploadedImage ? "Describe what you're looking for (optional)..." : "Ask me anything about RAK Porcelain..."}
-                className="flex-1 resize-none bg-transparent px-6 py-2.5 text-[15px] text-gray-900 placeholder:text-gray-400 focus:outline-none border-0 leading-relaxed scrollbar-hide"
+                className="flex-1 resize-none bg-transparent px-6 py-2 text-[15px] text-gray-900 placeholder:text-gray-400 focus:outline-none border-0 leading-relaxed scrollbar-hide"
                 rows={1}
                 disabled={isLoading || isAnalyzingImage}
                 style={{
-                  minHeight: '20px',
+                  minHeight: '24px',
                   maxHeight: '200px',
                   outline: 'none',
                   boxShadow: 'none',
@@ -833,7 +833,7 @@ export function ChatInterface() {
                 }}
                 onInput={(e) => {
                   const target = e.target as HTMLTextAreaElement;
-                  target.style.height = '20px';
+                  target.style.height = '24px';
                   target.style.height = target.scrollHeight + 'px';
                 }}
               />
