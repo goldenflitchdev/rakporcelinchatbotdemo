@@ -11,6 +11,7 @@ const redHatDisplay = Red_Hat_Display({
 export const metadata: Metadata = {
   title: "RAK Porcelain Assistant - Customer Support Chatbot",
   description: "AI-powered customer support assistant for RAK Porcelain. Get instant answers about products, care instructions, warranties, and more.",
+  viewport: "width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no",
 };
 
 export default function RootLayout({
