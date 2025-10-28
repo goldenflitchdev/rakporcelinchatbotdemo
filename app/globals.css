@@ -194,3 +194,14 @@ body {
 .scrollbar-hide::-webkit-scrollbar {
   display: none;
 }
+
+/* Responsive placeholder text */
+.responsive-placeholder::placeholder {
+  content: "Ask me anything...";
+}
+
+@media (min-width: 768px) {
+  .responsive-placeholder::placeholder {
+    content: "Ask me anything about RAK Porcelain...";
+  }
+}

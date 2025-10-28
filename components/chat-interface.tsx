@@ -357,6 +357,20 @@ export function ChatInterface() {
     "Tell me about B2B options"
   ];
 
+  const [isMobile, setIsMobile] = useState(false);
+
+  // Check if mobile on mount and resize
+  useEffect(() => {
+    const checkMobile = () => {
+      setIsMobile(window.innerWidth < 768);
+    };
+    
+    checkMobile();
+    window.addEventListener('resize', checkMobile);
+    
+    return () => window.removeEventListener('resize', checkMobile);
+  }, []);
+
   // Mobile: show only first 2 questions
   const mobileSuggestedQuestions = suggestedQuestions.slice(0, 2);
 
@@ -837,7 +851,7 @@ export function ChatInterface() {
                 value={input}
                 onChange={(e) => setInput(e.target.value)}
                 onKeyDown={handleKeyDown}
-                placeholder={uploadedImage ? "Describe what you're looking for (optional)..." : "Ask me anything about RAK Porcelain..."}
+                placeholder={uploadedImage ? "Describe what you're looking for (optional)..." : (isMobile ? "Ask me anything..." : "Ask me anything about RAK Porcelain...")}
                 className="flex-1 resize-none bg-transparent px-4 md:px-6 py-2 text-sm md:text-[15px] text-gray-900 placeholder:text-gray-400 focus:outline-none border-0 leading-relaxed scrollbar-hide"
                 rows={1}
                 disabled={isLoading || isAnalyzingImage}
