@@ -658,6 +658,28 @@ ls -la data/vector-store.json
 
 ## 📜 Changelog
 
+### **[v1.0.3] - 2025-10-28**
+
+#### 🎨 **Brand-Aligned Design**
+- Changed primary font to Red Hat Display (all weights: 300-900)
+- Replaced all blue colors with RAK brand brown: rgb(164, 120, 100)
+- Updated input field to full capsule shape (rounded-full)
+- Changed send button to perfect circle (rounded-full)
+- Applied RAK brown to all gradients and accent colors
+- Updated hover states with brand-appropriate brown tones
+- Updated source citation badges with RAK brown
+- Updated focus states and borders with brand colors
+- Lighter brown for dark mode: rgb(184, 140, 120)
+- Updated page metadata for better SEO
+
+#### 🎯 **Design Philosophy**
+- RAK brown creates warm, premium feel matching porcelain aesthetic
+- Capsule input provides smooth, modern interaction
+- Red Hat Display font is clean, professional, and highly readable
+- Brand consistency throughout entire interface
+
+---
+
 ### **[v1.0.2] - 2025-10-28**
 
 #### ✨ **Major UI Overhaul - Gemini-Inspired Experience**
