@@ -1,27 +1,24 @@
 'use client';
 
 import { useState, useRef, useEffect } from 'react';
-import { Send, Loader2, AlertCircle, ExternalLink } from 'lucide-react';
+import { Send, Loader2, AlertCircle, ExternalLink, Sparkles, User } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
 interface Message {
   role: 'user' | 'assistant';
   content: string;
   sources?: string[];
+  isStreaming?: boolean;
 }
 
 export function ChatInterface() {
-  const [messages, setMessages] = useState<Message[]>([
-    {
-      role: 'assistant',
-      content: 'Hello! I\'m the RAK Porcelain customer support assistant. How can I help you today?',
-    },
-  ]);
+  const [messages, setMessages] = useState<Message[]>([]);
   const [input, setInput] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLTextAreaElement>(null);
+  const [showWelcome, setShowWelcome] = useState(true);
 
   const scrollToBottom = () => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
@@ -31,6 +28,10 @@ export function ChatInterface() {
     scrollToBottom();
   }, [messages]);
 
+  useEffect(() => {
+    inputRef.current?.focus();
+  }, []);
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     
@@ -39,10 +40,18 @@ export function ChatInterface() {
     const userMessage = input.trim();
     setInput('');
     setError(null);
+    setShowWelcome(false);
 
-    // Add user message
+    // Add user message immediately
     setMessages(prev => [...prev, { role: 'user', content: userMessage }]);
     setIsLoading(true);
+
+    // Add loading placeholder for assistant
+    setMessages(prev => [...prev, { 
+      role: 'assistant', 
+      content: '', 
+      isStreaming: true 
+    }]);
 
     try {
       const response = await fetch('/api/chat', {
@@ -62,20 +71,22 @@ export function ChatInterface() {
 
       const data = await response.json();
 
-      // Add assistant message
-      setMessages(prev => [
-        ...prev,
-        {
+      // Replace loading message with actual response
+      setMessages(prev => {
+        const newMessages = [...prev];
+        newMessages[newMessages.length - 1] = {
           role: 'assistant',
           content: data.message,
           sources: data.sources,
-        },
-      ]);
+          isStreaming: false,
+        };
+        return newMessages;
+      });
     } catch (err) {
       console.error('Chat error:', err);
       setError(err instanceof Error ? err.message : 'An error occurred');
       
-      // Remove the user message if there was an error
+      // Remove loading message on error
       setMessages(prev => prev.slice(0, -1));
     } finally {
       setIsLoading(false);
@@ -90,133 +101,218 @@ export function ChatInterface() {
     }
   };
 
+  const suggestedQuestions = [
+    "What products does RAK Porcelain offer?",
+    "How do I care for porcelain dinnerware?",
+    "Tell me about your B2B services",
+    "What is your warranty policy?"
+  ];
+
   return (
-    <div className="flex flex-col h-screen max-w-4xl mx-auto bg-background">
+    <div className="flex flex-col h-screen bg-white dark:bg-[#1f1f1f]">
       {/* Header */}
-      <header className="border-b border-gray-200 dark:border-gray-800 px-6 py-4 bg-white dark:bg-gray-900">
-        <div className="flex items-center gap-3">
-          <div className="w-10 h-10 rounded-full bg-gradient-to-br from-blue-500 to-purple-600 flex items-center justify-center text-white font-bold">
-            RAK
-          </div>
-          <div>
-            <h1 className="text-xl font-bold text-foreground">RAK Porcelain</h1>
-            <p className="text-sm text-gray-600 dark:text-gray-400">Customer Support Assistant</p>
+      <header className="border-b border-gray-200 dark:border-gray-800 px-6 md:px-8 py-4 bg-white/80 dark:bg-[#1f1f1f]/80 backdrop-blur-sm sticky top-0 z-10">
+        <div className="max-w-5xl mx-auto flex items-center justify-between">
+          <div className="flex items-center gap-3">
+            <div className="relative">
+              <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-blue-500 via-purple-500 to-pink-500 flex items-center justify-center shadow-lg">
+                <Sparkles className="w-5 h-5 text-white" strokeWidth={2.5} />
+              </div>
+              <div className="absolute -bottom-1 -right-1 w-3 h-3 bg-green-500 rounded-full border-2 border-white dark:border-[#1f1f1f]"></div>
+            </div>
+            <div>
+              <h1 className="text-lg font-semibold text-gray-900 dark:text-gray-100">
+                RAK Porcelain Assistant
+              </h1>
+              <p className="text-xs text-gray-500 dark:text-gray-400">
+                Always here to help
+              </p>
+            </div>
           </div>
         </div>
       </header>
 
-      {/* Messages */}
-      <div className="flex-1 overflow-y-auto px-6 py-4 space-y-4">
-        {messages.map((message, index) => (
-          <div
-            key={index}
-            className={cn(
-              'flex gap-3',
-              message.role === 'user' ? 'justify-end' : 'justify-start'
-            )}
-          >
-            {message.role === 'assistant' && (
-              <div className="w-8 h-8 rounded-full bg-gradient-to-br from-blue-500 to-purple-600 flex items-center justify-center text-white text-sm font-bold flex-shrink-0">
-                R
-              </div>
-            )}
-            
-            <div
-              className={cn(
-                'max-w-[80%] rounded-2xl px-4 py-3',
-                message.role === 'user'
-                  ? 'bg-blue-600 text-white'
-                  : 'bg-gray-100 dark:bg-gray-800 text-foreground'
-              )}
-            >
-              <p className="whitespace-pre-wrap break-words">{message.content}</p>
-              
-              {message.sources && message.sources.length > 0 && (
-                <div className="mt-3 pt-3 border-t border-gray-300 dark:border-gray-600">
-                  <p className="text-xs font-semibold mb-2 opacity-75">Sources:</p>
-                  <div className="space-y-1">
-                    {message.sources.map((source, idx) => (
-                      <a
-                        key={idx}
-                        href={source}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="flex items-center gap-1 text-xs hover:underline opacity-75 hover:opacity-100"
-                      >
-                        <ExternalLink className="w-3 h-3" />
-                        <span className="truncate">{source}</span>
-                      </a>
-                    ))}
-                  </div>
+      {/* Messages Area */}
+      <div className="flex-1 overflow-y-auto">
+        <div className="max-w-5xl mx-auto px-6 md:px-8 py-8">
+          {/* Welcome Screen */}
+          {showWelcome && messages.length === 0 && (
+            <div className="space-y-8 animate-in fade-in duration-700">
+              <div className="text-center space-y-4 py-12">
+                <div className="inline-flex items-center justify-center w-20 h-20 rounded-3xl bg-gradient-to-br from-blue-500 via-purple-500 to-pink-500 shadow-2xl mb-4">
+                  <Sparkles className="w-10 h-10 text-white" strokeWidth={2} />
                 </div>
-              )}
-            </div>
-
-            {message.role === 'user' && (
-              <div className="w-8 h-8 rounded-full bg-gray-300 dark:bg-gray-700 flex items-center justify-center text-gray-700 dark:text-gray-300 text-sm font-bold flex-shrink-0">
-                U
+                <h2 className="text-4xl md:text-5xl font-bold text-gray-900 dark:text-gray-100 tracking-tight">
+                  Hello, I'm your RAK Porcelain assistant
+                </h2>
+                <p className="text-xl text-gray-600 dark:text-gray-400 max-w-2xl mx-auto leading-relaxed">
+                  I can help you learn about our products, care instructions, warranties, and more. 
+                  What would you like to know?
+                </p>
               </div>
-            )}
-          </div>
-        ))}
 
-        {isLoading && (
-          <div className="flex gap-3 justify-start">
-            <div className="w-8 h-8 rounded-full bg-gradient-to-br from-blue-500 to-purple-600 flex items-center justify-center text-white text-sm font-bold flex-shrink-0">
-              R
+              {/* Suggested Questions */}
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-3 max-w-3xl mx-auto">
+                {suggestedQuestions.map((question, index) => (
+                  <button
+                    key={index}
+                    onClick={() => setInput(question)}
+                    className="group p-4 text-left rounded-2xl border border-gray-200 dark:border-gray-700 hover:border-blue-500 dark:hover:border-blue-400 hover:bg-blue-50 dark:hover:bg-blue-950/20 transition-all duration-200 hover:shadow-md"
+                  >
+                    <p className="text-sm text-gray-700 dark:text-gray-300 group-hover:text-blue-700 dark:group-hover:text-blue-300 leading-relaxed">
+                      {question}
+                    </p>
+                  </button>
+                ))}
+              </div>
             </div>
-            <div className="bg-gray-100 dark:bg-gray-800 rounded-2xl px-4 py-3">
-              <Loader2 className="w-5 h-5 animate-spin text-gray-600 dark:text-gray-400" />
-            </div>
-          </div>
-        )}
+          )}
 
-        {error && (
-          <div className="flex gap-3 justify-center">
-            <div className="bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-lg px-4 py-3 flex items-center gap-2 text-red-800 dark:text-red-200">
-              <AlertCircle className="w-5 h-5 flex-shrink-0" />
-              <p className="text-sm">{error}</p>
-            </div>
-          </div>
-        )}
+          {/* Messages */}
+          <div className="space-y-8">
+            {messages.map((message, index) => (
+              <div
+                key={index}
+                className={cn(
+                  "flex gap-4 md:gap-6 animate-in fade-in slide-in-from-bottom-4 duration-500",
+                  message.role === 'user' ? 'justify-end' : 'justify-start'
+                )}
+              >
+                {message.role === 'assistant' && (
+                  <div className="flex-shrink-0">
+                    <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-blue-500 via-purple-500 to-pink-500 flex items-center justify-center shadow-lg">
+                      <Sparkles className="w-5 h-5 text-white" strokeWidth={2.5} />
+                    </div>
+                  </div>
+                )}
 
-        <div ref={messagesEndRef} />
+                <div className={cn(
+                  "flex-1 max-w-[85%] md:max-w-[75%] space-y-3",
+                  message.role === 'user' && 'flex justify-end'
+                )}>
+                  {message.role === 'user' ? (
+                    <div className="inline-block px-6 py-4 rounded-3xl bg-blue-600 text-white shadow-lg">
+                      <p className="text-[15px] leading-relaxed whitespace-pre-wrap break-words">
+                        {message.content}
+                      </p>
+                    </div>
+                  ) : (
+                    <div className="space-y-3">
+                      {message.isStreaming ? (
+                        <div className="flex items-center gap-2 text-gray-500 dark:text-gray-400">
+                          <Loader2 className="w-5 h-5 animate-spin" />
+                          <span className="text-sm">Thinking...</span>
+                        </div>
+                      ) : (
+                        <>
+                          <div className="prose prose-lg dark:prose-invert max-w-none">
+                            <p className="text-[15px] leading-relaxed text-gray-800 dark:text-gray-200 whitespace-pre-wrap break-words m-0">
+                              {message.content}
+                            </p>
+                          </div>
+
+                          {message.sources && message.sources.length > 0 && (
+                            <div className="pt-3 mt-3 border-t border-gray-200 dark:border-gray-700">
+                              <p className="text-xs font-medium text-gray-500 dark:text-gray-400 mb-2 uppercase tracking-wide">
+                                Sources
+                              </p>
+                              <div className="flex flex-wrap gap-2">
+                                {message.sources.map((source, idx) => (
+                                  <a
+                                    key={idx}
+                                    href={source}
+                                    target="_blank"
+                                    rel="noopener noreferrer"
+                                    className="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs rounded-full bg-blue-50 dark:bg-blue-950/30 text-blue-700 dark:text-blue-300 hover:bg-blue-100 dark:hover:bg-blue-950/50 transition-colors group"
+                                  >
+                                    <ExternalLink className="w-3 h-3 group-hover:scale-110 transition-transform" />
+                                    <span className="max-w-[200px] truncate">
+                                      {new URL(source).pathname.split('/').pop() || 'Source'}
+                                    </span>
+                                  </a>
+                                ))}
+                              </div>
+                            </div>
+                          )}
+                        </>
+                      )}
+                    </div>
+                  )}
+                </div>
+
+                {message.role === 'user' && (
+                  <div className="flex-shrink-0">
+                    <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-gray-600 to-gray-800 flex items-center justify-center shadow-lg">
+                      <User className="w-5 h-5 text-white" strokeWidth={2.5} />
+                    </div>
+                  </div>
+                )}
+              </div>
+            ))}
+          </div>
+
+          {/* Error Message */}
+          {error && (
+            <div className="flex justify-center mt-6 animate-in fade-in slide-in-from-bottom-2">
+              <div className="inline-flex items-center gap-3 px-5 py-3 rounded-2xl bg-red-50 dark:bg-red-950/20 border border-red-200 dark:border-red-800 text-red-700 dark:text-red-300">
+                <AlertCircle className="w-5 h-5 flex-shrink-0" />
+                <p className="text-sm">{error}</p>
+              </div>
+            </div>
+          )}
+
+          <div ref={messagesEndRef} />
+        </div>
       </div>
 
-      {/* Input */}
-      <div className="border-t border-gray-200 dark:border-gray-800 px-6 py-4 bg-white dark:bg-gray-900">
-        <form onSubmit={handleSubmit} className="flex gap-2">
-          <textarea
-            ref={inputRef}
-            value={input}
-            onChange={(e) => setInput(e.target.value)}
-            onKeyDown={handleKeyDown}
-            placeholder="Ask about RAK Porcelain products, care instructions, shipping..."
-            className="flex-1 resize-none rounded-lg border border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-800 px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent disabled:opacity-50 disabled:cursor-not-allowed"
-            rows={1}
-            disabled={isLoading}
-            style={{
-              minHeight: '44px',
-              maxHeight: '120px',
-            }}
-          />
-          <button
-            type="submit"
-            disabled={isLoading || !input.trim()}
-            className="bg-blue-600 hover:bg-blue-700 disabled:bg-gray-400 disabled:cursor-not-allowed text-white rounded-lg px-4 py-3 flex items-center justify-center transition-colors"
-          >
-            {isLoading ? (
-              <Loader2 className="w-5 h-5 animate-spin" />
-            ) : (
-              <Send className="w-5 h-5" />
-            )}
-          </button>
-        </form>
-        <p className="text-xs text-gray-500 dark:text-gray-400 mt-2 text-center">
-          Powered by OpenAI • Information based on rakporcelain.com
-        </p>
+      {/* Input Area */}
+      <div className="border-t border-gray-200 dark:border-gray-800 bg-white/80 dark:bg-[#1f1f1f]/80 backdrop-blur-sm">
+        <div className="max-w-5xl mx-auto px-6 md:px-8 py-6">
+          <form onSubmit={handleSubmit} className="relative">
+            <div className="relative flex items-end gap-3 p-2 rounded-3xl border-2 border-gray-200 dark:border-gray-700 focus-within:border-blue-500 dark:focus-within:border-blue-400 bg-white dark:bg-[#2a2a2a] transition-all shadow-lg shadow-gray-200/50 dark:shadow-black/50">
+              <textarea
+                ref={inputRef}
+                value={input}
+                onChange={(e) => setInput(e.target.value)}
+                onKeyDown={handleKeyDown}
+                placeholder="Ask me anything about RAK Porcelain..."
+                className="flex-1 resize-none bg-transparent px-4 py-3 text-[15px] text-gray-900 dark:text-gray-100 placeholder:text-gray-400 dark:placeholder:text-gray-500 focus:outline-none leading-relaxed"
+                rows={1}
+                disabled={isLoading}
+                style={{
+                  minHeight: '24px',
+                  maxHeight: '200px',
+                }}
+                onInput={(e) => {
+                  const target = e.target as HTMLTextAreaElement;
+                  target.style.height = '24px';
+                  target.style.height = target.scrollHeight + 'px';
+                }}
+              />
+              <button
+                type="submit"
+                disabled={isLoading || !input.trim()}
+                className={cn(
+                  "flex-shrink-0 p-3 rounded-2xl transition-all duration-200",
+                  isLoading || !input.trim()
+                    ? "bg-gray-200 dark:bg-gray-700 text-gray-400 dark:text-gray-500 cursor-not-allowed"
+                    : "bg-blue-600 hover:bg-blue-700 text-white shadow-lg shadow-blue-500/30 hover:shadow-xl hover:shadow-blue-500/40 hover:scale-105"
+                )}
+              >
+                {isLoading ? (
+                  <Loader2 className="w-5 h-5 animate-spin" />
+                ) : (
+                  <Send className="w-5 h-5" />
+                )}
+              </button>
+            </div>
+          </form>
+
+          <p className="text-xs text-center text-gray-500 dark:text-gray-500 mt-4 leading-relaxed">
+            RAK Porcelain AI Assistant can make mistakes. Check important info.
+          </p>
+        </div>
       </div>
     </div>
   );
 }
-
