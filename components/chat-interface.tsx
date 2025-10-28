@@ -115,10 +115,10 @@ export function ChatInterface() {
   };
 
   const suggestedQuestions = [
-    "What products does RAK Porcelain offer?",
-    "How do I care for porcelain dinnerware?",
-    "Tell me about your B2B services",
-    "What is your warranty policy?"
+    "Show me your plate collections",
+    "What's new at RAK Porcelain?",
+    "How do I care for porcelain?",
+    "Tell me about B2B options"
   ];
 
   return (
@@ -156,11 +156,10 @@ export function ChatInterface() {
                   <Sparkles className="w-10 h-10 text-white" strokeWidth={2} />
                 </div>
                 <h2 className="text-4xl md:text-5xl font-bold text-gray-900 dark:text-gray-100 tracking-tight">
-                  Hello, I'm your RAK Porcelain assistant
+                  Hi! I'm here to help you explore RAK Porcelain
                 </h2>
                 <p className="text-xl text-gray-600 dark:text-gray-400 max-w-2xl mx-auto leading-relaxed">
-                  I can help you learn about our products, care instructions, warranties, and more. 
-                  What would you like to know?
+                  Looking for the perfect porcelain pieces? I'd love to show you our collections, answer questions, or help you find exactly what you need.
                 </p>
               </div>
 
@@ -212,16 +211,25 @@ export function ChatInterface() {
                   ) : (
                     <div className="space-y-3">
                       {message.isStreaming ? (
-                        <div className="flex items-center gap-2 text-gray-500 dark:text-gray-400">
-                          <Loader2 className="w-5 h-5 animate-spin" />
-                          <span className="text-sm">Thinking...</span>
+                        <div className="flex items-center gap-2">
+                          <div className="flex gap-1">
+                            <span className="w-2 h-2 bg-[rgb(164,120,100)] dark:bg-[rgb(184,140,120)] rounded-full animate-bounce" style={{ animationDelay: '0ms' }}></span>
+                            <span className="w-2 h-2 bg-[rgb(164,120,100)] dark:bg-[rgb(184,140,120)] rounded-full animate-bounce" style={{ animationDelay: '150ms' }}></span>
+                            <span className="w-2 h-2 bg-[rgb(164,120,100)] dark:bg-[rgb(184,140,120)] rounded-full animate-bounce" style={{ animationDelay: '300ms' }}></span>
+                          </div>
                         </div>
                       ) : (
                         <>
-                          <div className="prose prose-lg dark:prose-invert max-w-none">
-                            <p className="text-[15px] leading-relaxed text-gray-800 dark:text-gray-200 whitespace-pre-wrap break-words m-0">
-                              {message.content}
-                            </p>
+                          <div className="space-y-4">
+                            {message.content.split('\n\n').map((paragraph, idx) => (
+                              <p 
+                                key={idx}
+                                className="text-[15px] leading-relaxed text-gray-800 dark:text-gray-200 m-0 animate-in fade-in duration-300"
+                                style={{ animationDelay: `${idx * 100}ms` }}
+                              >
+                                {paragraph}
+                              </p>
+                            ))}
                           </div>
 
                           {/* Product Thumbnails */}
