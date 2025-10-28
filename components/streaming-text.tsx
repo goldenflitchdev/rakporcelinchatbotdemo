@@ -84,7 +84,7 @@ export function StreamingText({
   }, [text, speed, onComplete, isStreaming]);
 
   return (
-    <span className={`inline ${className}`}>
+    <span className={`inline-block ${className}`} style={{ whiteSpace: 'pre-wrap' }}>
       {displayedText}
       {showCursor && (
         <span className="inline-block w-0.5 h-4 ml-0.5 bg-current animate-pulse align-middle">
