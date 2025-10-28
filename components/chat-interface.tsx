@@ -270,13 +270,13 @@ export function ChatInterface() {
       <header className="border-b border-gray-200 px-6 md:px-8 py-4 bg-white/80 backdrop-blur-sm sticky top-0 z-10">
         <div className="max-w-5xl mx-auto flex items-center justify-between">
           <div className="flex items-center gap-3">
-            <div className="w-12 h-12 flex items-center justify-center">
+            <div className="w-16 h-16 flex items-center justify-center">
               <Image 
                 src="/rak-logo.svg" 
                 alt="RAK Porcelain" 
-                width={48} 
-                height={48}
-                className="w-12 h-12"
+                width={64} 
+                height={64}
+                className="w-16 h-16"
               />
             </div>
             <div>
