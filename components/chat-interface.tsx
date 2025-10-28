@@ -64,41 +64,41 @@ export function ChatInterface() {
     inputRef.current?.focus();
   }, []);
 
-  // Fetch random subcategories on component mount
+  // Fetch random dinnerware collections on component mount
   useEffect(() => {
-    const fetchRandomSubCategories = async () => {
+    const fetchRandomDinnerwareCollections = async () => {
       setIsLoadingSubCategories(true);
       try {
         const count = Math.floor(Math.random() * 5) + 3; // Random between 3-7
-        const response = await fetch(`/api/subcategories?count=${count}&locale=en`);
+        const response = await fetch(`/api/dinnerware-collections?count=${count}`);
         const data = await response.json();
         
         if (data.subcategories) {
           setRandomSubCategories(data.subcategories);
         }
       } catch (error) {
-        console.error('Error fetching subcategories:', error);
+        console.error('Error fetching dinnerware collections:', error);
       } finally {
         setIsLoadingSubCategories(false);
       }
     };
 
-    fetchRandomSubCategories();
+    fetchRandomDinnerwareCollections();
   }, []);
 
-  // Function to refresh subcategories
+  // Function to refresh dinnerware collections
   const refreshSubCategories = async () => {
     setIsLoadingSubCategories(true);
     try {
       const count = Math.floor(Math.random() * 5) + 3; // Random between 3-7
-      const response = await fetch(`/api/subcategories?count=${count}&locale=en`);
+      const response = await fetch(`/api/dinnerware-collections?count=${count}`);
       const data = await response.json();
       
       if (data.subcategories) {
         setRandomSubCategories(data.subcategories);
       }
     } catch (error) {
-      console.error('Error fetching subcategories:', error);
+      console.error('Error fetching dinnerware collections:', error);
     } finally {
       setIsLoadingSubCategories(false);
     }
