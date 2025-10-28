@@ -84,6 +84,14 @@ export function ChatInterface() {
       }
 
       const data = await response.json();
+      
+      // Debug log
+      console.log('API Response:', {
+        hasMessage: !!data.message,
+        hasSources: !!data.sources,
+        hasProducts: !!data.products,
+        productsCount: data.products?.length || 0
+      });
 
       // Typing animation effect
       setIsTyping(true);
@@ -265,10 +273,10 @@ export function ChatInterface() {
                           </div>
 
                           {/* Product Thumbnails - Show even while typing */}
-                          {message.products && message.products.length > 0 && (
+                          {message.products && message.products.length > 0 ? (
                             <div className="pt-4 mt-4 space-y-3 animate-in fade-in duration-500">
                               <p className="text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wide">
-                                Featured Products
+                                Featured Products ({message.products.length})
                               </p>
                               <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-3">
                                 {message.products.map((product, idx) => (
