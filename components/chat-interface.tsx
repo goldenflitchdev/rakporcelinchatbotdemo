@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useRef, useEffect } from 'react';
-import { Send, Loader2, AlertCircle, Sparkles, User, Tag, ChevronDown, ChevronUp } from 'lucide-react';
+import { Send, Loader2, AlertCircle, Sparkles, User, Tag, ChevronDown, ChevronUp, Image as ImageIcon, X } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { StreamingText } from './streaming-text';
 
@@ -35,6 +35,9 @@ export function ChatInterface() {
   const [typingText, setTypingText] = useState('');
   const [isTyping, setIsTyping] = useState(false);
   const [expandedSections, setExpandedSections] = useState<Record<number, { categories: boolean; subcategories: boolean }>>({});
+  const [uploadedImage, setUploadedImage] = useState<string | null>(null);
+  const [isAnalyzingImage, setIsAnalyzingImage] = useState(false);
+  const fileInputRef = useRef<HTMLInputElement>(null);
 
   const scrollToBottom = () => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
@@ -48,8 +51,113 @@ export function ChatInterface() {
     inputRef.current?.focus();
   }, []);
 
+  const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    // Check file size (max 4MB)
+    if (file.size > 4 * 1024 * 1024) {
+      setError('Image size must be less than 4MB');
+      return;
+    }
+
+    // Check file type
+    if (!file.type.startsWith('image/')) {
+      setError('Please upload an image file');
+      return;
+    }
+
+    const reader = new FileReader();
+    reader.onloadend = () => {
+      setUploadedImage(reader.result as string);
+    };
+    reader.readAsDataURL(file);
+  };
+
+  const handleImageSearch = async () => {
+    if (!uploadedImage) return;
+
+    setError(null);
+    setShowWelcome(false);
+    setIsAnalyzingImage(true);
+
+    // Add user message with image
+    setMessages(prev => [...prev, { 
+      role: 'user', 
+      content: '🖼️ Uploaded an image to find similar products' 
+    }]);
+
+    // Add loading placeholder
+    setMessages(prev => [...prev, { 
+      role: 'assistant', 
+      content: '', 
+      isStreaming: true 
+    }]);
+
+    try {
+      const response = await fetch('/api/analyze-image', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ image: uploadedImage }),
+      });
+
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.error || 'Failed to analyze image');
+      }
+
+      const data = await response.json();
+
+      // Update message with results
+      setMessages(prev => {
+        const newMessages = [...prev];
+        newMessages[newMessages.length - 1] = {
+          role: 'assistant',
+          content: data.message,
+          products: data.products,
+          isStreaming: true,
+        };
+        return newMessages;
+      });
+
+      // Mark as complete
+      setTimeout(() => {
+        setMessages(prev => {
+          const newMessages = [...prev];
+          if (newMessages.length > 0) {
+            newMessages[newMessages.length - 1] = {
+              ...newMessages[newMessages.length - 1],
+              isStreaming: false,
+            };
+          }
+          return newMessages;
+        });
+      }, data.message.length * 25);
+
+      // Clear uploaded image
+      setUploadedImage(null);
+      if (fileInputRef.current) {
+        fileInputRef.current.value = '';
+      }
+    } catch (err) {
+      console.error('Image analysis error:', err);
+      setError(err instanceof Error ? err.message : 'Failed to analyze image');
+      setMessages(prev => prev.slice(0, -1));
+    } finally {
+      setIsAnalyzingImage(false);
+    }
+  };
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    
+    // If there's an uploaded image, handle image search instead
+    if (uploadedImage) {
+      await handleImageSearch();
+      return;
+    }
     
     if (!input.trim() || isLoading) return;
 
@@ -510,17 +618,65 @@ export function ChatInterface() {
       {/* Input Area */}
       <div className="border-t border-gray-200 bg-white/80 backdrop-blur-sm">
         <div className="max-w-5xl mx-auto px-6 md:px-8 py-6">
+          {/* Image Preview */}
+          {uploadedImage && (
+            <div className="mb-4 p-3 bg-gray-50 rounded-2xl border border-gray-200">
+              <div className="flex items-center gap-3">
+                <div className="relative">
+                  <img 
+                    src={uploadedImage} 
+                    alt="Uploaded" 
+                    className="w-16 h-16 object-cover rounded-lg"
+                  />
+                  <button
+                    onClick={() => {
+                      setUploadedImage(null);
+                      if (fileInputRef.current) {
+                        fileInputRef.current.value = '';
+                      }
+                    }}
+                    className="absolute -top-2 -right-2 p-1 bg-red-500 hover:bg-red-600 text-white rounded-full transition-colors"
+                  >
+                    <X className="w-3 h-3" />
+                  </button>
+                </div>
+                <div className="flex-1">
+                  <p className="text-sm font-medium text-gray-900">Image ready to analyze</p>
+                  <p className="text-xs text-gray-500">Click send to find similar products</p>
+                </div>
+              </div>
+            </div>
+          )}
+
           <form onSubmit={handleSubmit} className="relative">
             <div className="relative flex items-end gap-3 p-2 rounded-full border border-gray-200 focus-within:border-[rgb(164,120,100)] bg-white transition-all shadow-lg shadow-gray-200/50">
+              {/* Image Upload Button */}
+              <input
+                ref={fileInputRef}
+                type="file"
+                accept="image/*"
+                onChange={handleImageUpload}
+                className="hidden"
+              />
+              <button
+                type="button"
+                onClick={() => fileInputRef.current?.click()}
+                disabled={isLoading || isAnalyzingImage}
+                className="flex-shrink-0 p-3 text-gray-600 hover:text-[rgb(164,120,100)] hover:bg-[rgba(164,120,100,0.1)] rounded-full transition-all"
+                title="Upload image to find similar products"
+              >
+                <ImageIcon className="w-5 h-5" />
+              </button>
+
               <textarea
                 ref={inputRef}
                 value={input}
                 onChange={(e) => setInput(e.target.value)}
                 onKeyDown={handleKeyDown}
-                placeholder="Ask me anything about RAK Porcelain..."
+                placeholder={uploadedImage ? "Click send to analyze image..." : "Ask me anything about RAK Porcelain..."}
                 className="flex-1 resize-none bg-transparent px-6 py-3 text-[15px] text-gray-900 placeholder:text-gray-400 focus:outline-none border-0 leading-relaxed"
                 rows={1}
-                disabled={isLoading}
+                disabled={isLoading || isAnalyzingImage || !!uploadedImage}
                 style={{
                   minHeight: '24px',
                   maxHeight: '200px',
@@ -535,15 +691,15 @@ export function ChatInterface() {
               />
               <button
                 type="submit"
-                disabled={isLoading || !input.trim()}
+                disabled={(isLoading || isAnalyzingImage) || (!input.trim() && !uploadedImage)}
                 className={cn(
                   "flex-shrink-0 p-3 rounded-full transition-all duration-200",
-                  isLoading || !input.trim()
+                  (isLoading || isAnalyzingImage) || (!input.trim() && !uploadedImage)
                     ? "bg-gray-200 text-gray-400 cursor-not-allowed"
                     : "bg-[rgb(164,120,100)] hover:bg-[rgb(144,100,80)] text-white shadow-lg shadow-[rgba(164,120,100,0.3)] hover:shadow-xl hover:shadow-[rgba(164,120,100,0.4)] hover:scale-105"
                 )}
               >
-                {isLoading ? (
+                {(isLoading || isAnalyzingImage) ? (
                   <Loader2 className="w-5 h-5 animate-spin" />
                 ) : (
                   <Send className="w-5 h-5" />
@@ -553,7 +709,9 @@ export function ChatInterface() {
           </form>
 
           <p className="text-xs text-center text-gray-500 mt-4 leading-relaxed">
-            RAK Porcelain AI Assistant can make mistakes. Check important info.
+            {uploadedImage 
+              ? "Upload an image to find visually similar RAK Porcelain products" 
+              : "RAK Porcelain AI Assistant can make mistakes. Check important info."}
           </p>
         </div>
       </div>
