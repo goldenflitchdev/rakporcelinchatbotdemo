@@ -3,6 +3,7 @@
 import { useState, useRef, useEffect } from 'react';
 import { Send, Loader2, AlertCircle, ExternalLink, Sparkles, User } from 'lucide-react';
 import { cn } from '@/lib/utils';
+import { StreamingText } from './streaming-text';
 
 interface ProductCard {
   id: number;
@@ -90,92 +91,38 @@ export function ChatInterface() {
         hasMessage: !!data.message,
         hasSources: !!data.sources,
         hasProducts: !!data.products,
-        productsCount: data.products?.length || 0
+        productsCount: data.products?.length || 0,
+        cached: data.cached || false
       });
 
-      // Split response into sentences
-      const fullText = data.message;
-      const sentences = fullText.match(/[^.!?]+[.!?]+/g) || [fullText];
-      
-      console.log(`Streaming ${sentences.length} sentences...`);
+      // Update message with streaming enabled
+      setIsTyping(true);
+      setMessages(prev => {
+        const newMessages = [...prev];
+        newMessages[newMessages.length - 1] = {
+          role: 'assistant',
+          content: data.message,
+          sources: data.sources,
+          products: data.products,
+          isStreaming: true, // Will trigger StreamingText component
+        };
+        return newMessages;
+      });
 
-      // Stream one sentence at a time with "Thinking..." in between
-      let currentSentence = 0;
-      let accumulatedText = '';
-
-      const streamNextSentence = async () => {
-        if (currentSentence < sentences.length) {
-          const sentence = sentences[currentSentence].trim();
-          
-          // Show "Thinking..." before next sentence (except first one)
-          if (currentSentence > 0) {
-            setMessages(prev => {
-              const newMessages = [...prev];
-              newMessages[newMessages.length - 1] = {
-                role: 'assistant',
-                content: accumulatedText + '\n\n_Thinking..._',
-                sources: data.sources,
-                products: data.products,
-                isStreaming: true,
-              };
-              return newMessages;
-            });
-            
-            // Wait before showing next sentence (thinking pause)
-            await new Promise(resolve => setTimeout(resolve, 800));
-          }
-          
-          // Type out the sentence
-          accumulatedText += (currentSentence > 0 ? '\n\n' : '') + sentence;
-          
-          let charIndex = 0;
-          const sentenceText = sentence;
-          
-          const typeChar = () => {
-            if (charIndex < sentenceText.length) {
-              charIndex++;
-              const currentText = accumulatedText.substring(0, accumulatedText.length - sentenceText.length + charIndex);
-              
-              setMessages(prev => {
-                const newMessages = [...prev];
-                newMessages[newMessages.length - 1] = {
-                  role: 'assistant',
-                  content: currentText,
-                  sources: data.sources,
-                  products: data.products,
-                  isStreaming: true,
-                };
-                return newMessages;
-              });
-              
-              setTimeout(typeChar, 30); // 30ms per character
-            } else {
-              // Sentence complete, move to next
-              currentSentence++;
-              setTimeout(streamNextSentence, 300); // Brief pause between sentences
-            }
-          };
-          
-          typeChar();
-        } else {
-          // All sentences complete
-          setIsTyping(false);
-          setMessages(prev => {
-            const newMessages = [...prev];
+      // Mark as complete when done (will be handled by StreamingText onComplete)
+      setTimeout(() => {
+        setIsTyping(false);
+        setMessages(prev => {
+          const newMessages = [...prev];
+          if (newMessages.length > 0) {
             newMessages[newMessages.length - 1] = {
-              role: 'assistant',
-              content: accumulatedText,
-              sources: data.sources,
-              products: data.products,
+              ...newMessages[newMessages.length - 1],
               isStreaming: false,
             };
-            return newMessages;
-          });
-        }
-      };
-
-      setIsTyping(true);
-      streamNextSentence();
+          }
+          return newMessages;
+        });
+      }, data.message.length * 25); // Estimate time for typing to complete
     } catch (err) {
       console.error('Chat error:', err);
       setError(err instanceof Error ? err.message : 'An error occurred');
@@ -302,17 +249,25 @@ export function ChatInterface() {
                       ) : (
                         <>
                           <div className="space-y-4">
-                            {message.content.split('\n\n').map((paragraph, idx) => (
-                              <p 
-                                key={idx}
-                                className="text-[15px] leading-relaxed text-gray-800 dark:text-gray-200 m-0"
-                              >
-                                {paragraph}
-                                {message.isStreaming && idx === message.content.split('\n\n').length - 1 && (
-                                  <span className="inline-block w-0.5 h-4 ml-1 bg-[rgb(164,120,100)] dark:bg-[rgb(184,140,120)] animate-pulse"></span>
-                                )}
-                              </p>
-                            ))}
+                            {message.isStreaming ? (
+                              <div className="text-[15px] leading-relaxed text-gray-800 dark:text-gray-200">
+                                <StreamingText
+                                  text={message.content}
+                                  speed={20}
+                                  isStreaming={message.isStreaming}
+                                  className="text-[15px] leading-relaxed"
+                                />
+                              </div>
+                            ) : (
+                              message.content.split('\n\n').map((paragraph, idx) => (
+                                <p 
+                                  key={idx}
+                                  className="text-[15px] leading-relaxed text-gray-800 dark:text-gray-200 m-0"
+                                >
+                                  {paragraph}
+                                </p>
+                              ))
+                            )}
                           </div>
 
                           {/* Product Thumbnails - Show even while typing */}
