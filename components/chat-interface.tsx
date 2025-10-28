@@ -52,6 +52,47 @@ export function ChatInterface() {
     inputRef.current?.focus();
   }, []);
 
+  // Handle paste event for images
+  useEffect(() => {
+    const handlePaste = (e: ClipboardEvent) => {
+      const items = e.clipboardData?.items;
+      if (!items) return;
+
+      for (let i = 0; i < items.length; i++) {
+        const item = items[i];
+        
+        // Check if pasted item is an image
+        if (item.type.indexOf('image') !== -1) {
+          e.preventDefault();
+          const file = item.getAsFile();
+          
+          if (file) {
+            // Check file size (max 4MB)
+            if (file.size > 4 * 1024 * 1024) {
+              setError('Image size must be less than 4MB');
+              return;
+            }
+
+            const reader = new FileReader();
+            reader.onloadend = () => {
+              setUploadedImage(reader.result as string);
+              setError(null);
+            };
+            reader.readAsDataURL(file);
+          }
+          break;
+        }
+      }
+    };
+
+    // Add paste event listener to document
+    document.addEventListener('paste', handlePaste);
+
+    return () => {
+      document.removeEventListener('paste', handlePaste);
+    };
+  }, []);
+
   const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file) return;
@@ -767,7 +808,7 @@ export function ChatInterface() {
           <p className="text-xs text-center text-gray-500 mt-4 leading-relaxed">
             {uploadedImage 
               ? "Add a description to refine your search, or just click Send to find similar products" 
-              : "RAK Porcelain AI Assistant can make mistakes. Check important info."}
+              : "Tip: You can paste images directly (Ctrl/Cmd + V) or click the 📷 icon to upload"}
           </p>
         </div>
       </div>
