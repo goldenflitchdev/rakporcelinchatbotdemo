@@ -270,21 +270,18 @@ export function ChatInterface() {
       <header className="border-b border-gray-200 px-6 md:px-8 py-4 bg-white/80 backdrop-blur-sm sticky top-0 z-10">
         <div className="max-w-5xl mx-auto flex items-center justify-between">
           <div className="flex items-center gap-3">
-            <div className="relative">
-              <div className="w-10 h-10 rounded-xl bg-white flex items-center justify-center shadow-lg border border-gray-200">
-                <Image 
-                  src="/rak-logo.svg" 
-                  alt="RAK Porcelain" 
-                  width={32} 
-                  height={32}
-                  className="w-8 h-8"
-                />
-              </div>
-              <div className="absolute -bottom-1 -right-1 w-3 h-3 bg-green-500 rounded-full border-2 border-white"></div>
+            <div className="w-12 h-12 flex items-center justify-center">
+              <Image 
+                src="/rak-logo.svg" 
+                alt="RAK Porcelain" 
+                width={48} 
+                height={48}
+                className="w-12 h-12"
+              />
             </div>
             <div>
               <h1 className="text-lg font-semibold text-gray-900">
-                RAK Porcelain Assistant
+                RAK Porcelain Connoisseur
               </h1>
               <p className="text-xs text-gray-500">
                 Always here to help
@@ -303,7 +300,7 @@ export function ChatInterface() {
               <div className="text-center space-y-6">
                 {/* Brand Video - 1.6x size (128px * 1.6 = 204.8px ~ 52 in tailwind) */}
                 <div className="inline-flex items-center justify-center">
-                  <div className="relative w-52 h-52 rounded-full overflow-hidden shadow-2xl border-4 border-white ring-2 ring-gray-200">
+                  <div className="relative w-52 h-52 rounded-full overflow-hidden">
                     <video
                       autoPlay
                       loop
@@ -644,7 +641,7 @@ export function ChatInterface() {
       </div>
 
       {/* Input Area */}
-      <div className="border-t border-gray-200 bg-white/80 backdrop-blur-sm">
+      <div className="bg-white/80 backdrop-blur-sm">
         <div className="max-w-5xl mx-auto px-6 md:px-8 py-6">
           {/* Suggested Questions - Show when welcome is visible */}
           {showWelcome && messages.length === 0 && (
