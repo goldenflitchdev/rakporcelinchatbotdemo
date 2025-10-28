@@ -658,6 +658,33 @@ ls -la data/vector-store.json
 
 ## 📜 Changelog
 
+### **[v1.1.3] - 2025-10-28**
+
+#### 🧠 **Massively Enhanced Product Intelligence**
+- **60+ product keywords** for detection (up from 12)
+- Detects action words: show, see, looking for, need, want, buy, browse, explore
+- Detects question patterns: "what do you have", "do you sell", "available"
+- **20 collection names** recognized (Classic Gourmet, Banquet, Ease, Neo Fusion, etc.)
+- **25+ category variations** (dinner plate, soup bowl, coffee cup, serving dish, etc.)
+- Smarter search term extraction from natural language
+- **Products ALWAYS show** when any product-related query detected
+- AI explicitly told about products being displayed
+- AI naturally references products in responses ("check out the items below")
+- Graceful fallback if database not configured
+
+#### 💡 **Intelligence Examples**
+Now works with:
+- ✅ "Show me your products" → Displays 5 products
+- ✅ "What plates do you have?" → Shows plate products  
+- ✅ "Looking for bowls" → Shows bowl products
+- ✅ "Tell me about Classic Gourmet" → Shows collection products
+- ✅ "Need dinnerware" → Shows dinnerware
+- ✅ "What's available?" → Shows general products
+- ✅ "I want to buy cups" → Shows cup products
+- ✅ "Browse your catalog" → Shows products
+
+---
+
 ### **[v1.1.2] - 2025-10-28**
 
 #### 💬 **Human-Like Conversational AI**
