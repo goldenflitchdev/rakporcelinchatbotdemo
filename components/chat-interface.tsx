@@ -348,9 +348,9 @@ export function ChatInterface() {
                                   ...prev,
                                   [index]: { ...prev[index], categories: true }
                                 }))}
-                                className="inline-flex items-center gap-2 px-4 py-2 text-sm font-medium text-[rgb(144,100,80)] bg-[rgba(164,120,100,0.08)] hover:bg-[rgba(164,120,100,0.15)] rounded-full transition-all border border-[rgba(164,120,100,0.2)] hover:shadow-md"
+                                className="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium text-[rgb(144,100,80)] bg-[rgba(164,120,100,0.08)] hover:bg-[rgba(164,120,100,0.15)] rounded-full transition-all border border-[rgba(164,120,100,0.2)] hover:shadow-md"
                               >
-                                <ChevronDown className="w-4 h-4" />
+                                <ChevronDown className="w-3.5 h-3.5" />
                                 <span>Explore Dinnerware Categories</span>
                               </button>
                             )}
@@ -407,9 +407,9 @@ export function ChatInterface() {
                                       ...prev,
                                       [index]: { ...prev[index], subcategories: true }
                                     }))}
-                                    className="inline-flex items-center gap-2 px-4 py-2 text-sm font-medium text-[rgb(124,90,70)] bg-white hover:bg-[rgba(164,120,100,0.06)] rounded-full transition-all border border-gray-200 hover:border-[rgba(164,120,100,0.3)]"
+                                    className="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium text-[rgb(124,90,70)] bg-white hover:bg-[rgba(164,120,100,0.06)] rounded-full transition-all border border-gray-200 hover:border-[rgba(164,120,100,0.3)]"
                                   >
-                                    <ChevronDown className="w-4 h-4" />
+                                    <ChevronDown className="w-3.5 h-3.5" />
                                     <span>Show Plate Types</span>
                                   </button>
                                 )}
