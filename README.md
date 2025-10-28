@@ -671,12 +671,16 @@ ls -la data/vector-store.json
 - Updated focus states and borders with brand colors
 - Lighter brown for dark mode: rgb(184, 140, 120)
 - Updated page metadata for better SEO
+- Refined input box: removed internal textarea border
+- Made outer border thinner (border-1 instead of border-2)
+- Cleaner, more seamless capsule appearance
 
 #### 🎯 **Design Philosophy**
 - RAK brown creates warm, premium feel matching porcelain aesthetic
 - Capsule input provides smooth, modern interaction
 - Red Hat Display font is clean, professional, and highly readable
 - Brand consistency throughout entire interface
+- Borderless textarea creates seamless, clean input experience
 
 ---
 
