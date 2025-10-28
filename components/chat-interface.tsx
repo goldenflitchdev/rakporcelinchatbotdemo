@@ -593,7 +593,7 @@ export function ChatInterface() {
                                       title={`${subcategory.category} • ${subcategory.productCount} products`}
                                     >
                                       <span className="font-medium truncate max-w-[120px]">{subcategory.name}</span>
-                                      <span className="text-[10px] opacity-100 transition-opacity">
+                                      <span className="text-[10px] opacity-50 transition-opacity flex items-center">
                                         {subcategory.productCount}
                                       </span>
                                     </a>
