@@ -11,7 +11,8 @@
     "seed:real": "tsx scripts/seed-real-rak-data.ts",
     "db:inspect": "tsx scripts/inspect-database.ts",
     "db:sync": "tsx scripts/sync-database.ts",
-    "db:schedule": "tsx scripts/nightly-updater.ts"
+    "db:schedule": "tsx scripts/nightly-updater.ts",
+    "db:build-aesthetic": "tsx scripts/build-aesthetic-db.ts"
   },
   "dependencies": {
     "@chroma-core/default-embed": "^0.1.8",

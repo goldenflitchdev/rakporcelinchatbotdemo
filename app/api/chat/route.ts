@@ -11,6 +11,9 @@ import {
   getProductsByCollection,
   type ProductResult 
 } from '@/lib/product-search';
+import { analyzeQuery, buildSmartDatabaseQuery } from '@/lib/query-analyzer';
+import { query as dbQuery } from '@/lib/postgres';
+import { searchByAesthetic } from '@/lib/aesthetic-vector-store';
 
 export const runtime = 'nodejs';
 export const dynamic = 'force-dynamic';
@@ -54,37 +57,37 @@ export async function POST(req: NextRequest) {
 
     const userQuery = lastUserMessage.content;
 
-    // Step 1: Detect if user is asking about products
-    const productIntent = await detectProductIntent(userQuery);
+    // Step 1: Use AI to analyze query deeply
+    console.log('🧠 AI analyzing user query...');
+    const queryAnalysis = await analyzeQuery(userQuery);
+    console.log(`   Intent: ${queryAnalysis.userIntent}`);
+    console.log(`   Strategy: ${queryAnalysis.searchStrategy}`);
+    console.log(`   Suggested: "${queryAnalysis.suggestedQuery}"`);
+    
     let products: ProductResult[] = [];
 
-    if (productIntent.hasProductIntent) {
-      console.log('Product intent detected:', productIntent);
+    // Step 2: Search based on AI analysis
+    const productIntent = await detectProductIntent(userQuery);
+    
+    if (productIntent.hasProductIntent || queryAnalysis.confidence > 0.6) {
+      console.log('🔍 Product search initiated...');
       
-      // SMART HIERARCHICAL SEARCH:
-      // 1. Collection (most specific)
-      // 2. Category (medium specific) 
-      // 3. General keyword search (broad)
-      // This ensures relevant, varied results
+      // Use AI-suggested query for smarter search
+      const searchTerm = queryAnalysis.suggestedQuery || productIntent.searchTerm || userQuery;
       
+      // SMART HIERARCHICAL SEARCH with AI guidance
       if (productIntent.collection) {
-        console.log(`🎨 Searching collection: ${productIntent.collection}`);
+        console.log(`🎨 Collection: ${productIntent.collection}`);
         products = await getProductsByCollection(productIntent.collection, 5);
-      }
-      
-      // Fallback to category if no collection results
-      if (products.length === 0 && productIntent.category) {
-        console.log(`📂 Searching category: ${productIntent.category}`);
+      } else if (productIntent.category) {
+        console.log(`📂 Category: ${productIntent.category}`);
         products = await getProductsByCategory(productIntent.category, 5);
+      } else {
+        console.log(`🔍 AI-guided search: "${searchTerm}"`);
+        products = await searchProducts(searchTerm, 5);
       }
       
-      // Fallback to general search if still no results
-      if (products.length === 0 && productIntent.searchTerm) {
-        console.log(`🔍 General search: ${productIntent.searchTerm}`);
-        products = await searchProducts(productIntent.searchTerm, 5);
-      }
-      
-      console.log(`✅ Found ${products.length} relevant products to display`);
+      console.log(`✅ Displaying ${products.length} products`);
     }
 
     // Step 2: Create embedding for the user query
