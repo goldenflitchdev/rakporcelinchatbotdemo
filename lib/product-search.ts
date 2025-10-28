@@ -24,6 +24,7 @@ export async function searchProducts(
 ): Promise<ProductResult[]> {
   try {
     // Search products by name, code, or description
+    // Prioritize products with images
     const products = await query<{
       id: number;
       product_name: string;
@@ -39,6 +40,7 @@ export async function searchProducts(
               description, product_images, locale, material, shape
        FROM products
        WHERE published_at IS NOT NULL
+         AND product_images IS NOT NULL
          AND (
            LOWER(product_name) LIKE LOWER($1)
            OR LOWER(product_code) LIKE LOWER($1)
@@ -91,6 +93,7 @@ export async function getProductsByCategory(
     const category = categories[0];
 
     // Get products in this category via sub_categories
+    // Prioritize products with images
     const products = await query<{
       id: number;
       product_name: string;
@@ -109,6 +112,7 @@ export async function getProductsByCategory(
        INNER JOIN sub_categories_categories_links scc ON psc.sub_category_id = scc.sub_category_id
        WHERE scc.category_id = $1
          AND p.published_at IS NOT NULL
+         AND p.product_images IS NOT NULL
        ORDER BY p.updated_at DESC
        LIMIT $2`,
       [category.id, limit]
@@ -152,6 +156,7 @@ export async function getProductsByCollection(
     const collection = collections[0];
 
     // Get products in this collection
+    // Prioritize products with images
     const products = await query<{
       id: number;
       product_name: string;
@@ -169,6 +174,7 @@ export async function getProductsByCollection(
        INNER JOIN products_collection_links pc ON p.id = pc.product_id
        WHERE pc.collection_id = $1
          AND p.published_at IS NOT NULL
+         AND p.product_images IS NOT NULL
        ORDER BY p.updated_at DESC
        LIMIT $2`,
       [collection.id, limit]
@@ -193,7 +199,7 @@ export async function getProductsByCollection(
 
 function extractImageUrl(productImages: any): string {
   // Default placeholder image
-  const placeholder = '/api/placeholder-product.jpg';
+  const placeholder = 'https://via.placeholder.com/400x400/f3f4f6/9ca3af?text=RAK+Porcelain';
 
   if (!productImages) return placeholder;
 
@@ -203,9 +209,16 @@ function extractImageUrl(productImages: any): string {
       productImages = JSON.parse(productImages);
     }
 
-    // Handle array of images
+    // Handle array of images (RAK database format)
     if (Array.isArray(productImages) && productImages.length > 0) {
       const firstImage = productImages[0];
+      
+      // RAK format: { publicUrl: "https://...", fileKey: "...", productCode: "..." }
+      if (firstImage.publicUrl) {
+        return firstImage.publicUrl;
+      }
+      
+      // Alternative formats
       if (typeof firstImage === 'string') {
         return firstImage;
       }
@@ -215,11 +228,11 @@ function extractImageUrl(productImages: any): string {
     }
 
     // Handle object with url property
-    if (productImages.url) {
-      return productImages.url;
+    if (productImages.url || productImages.publicUrl) {
+      return productImages.url || productImages.publicUrl;
     }
 
-    // Handle nested structure
+    // Handle Strapi format
     if (productImages.data && Array.isArray(productImages.data)) {
       if (productImages.data[0]?.attributes?.url) {
         return productImages.data[0].attributes.url;
