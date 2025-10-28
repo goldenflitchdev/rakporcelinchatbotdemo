@@ -401,8 +401,7 @@ export function ChatInterface() {
                       playsInline
                       className="w-full h-full object-cover"
                     >
-                      <source src="/rak-brand-video.mov" type="video/mp4" />
-                      <source src="/rak-brand-video.mov" type="video/quicktime" />
+                      <source src="/rak-brand-video-compressed.mp4" type="video/mp4" />
                       {/* Fallback to logo if video doesn't load */}
                       <div className="w-full h-full bg-white flex items-center justify-center">
                         <Image 
