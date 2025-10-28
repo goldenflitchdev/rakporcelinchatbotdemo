@@ -18,7 +18,6 @@ export function StreamingText({
   className = '',
 }: StreamingTextProps) {
   const [displayedText, setDisplayedText] = useState('');
-  const [showCursor, setShowCursor] = useState(true);
   const indexRef = useRef(0);
   const previousTextRef = useRef('');
   const intervalRef = useRef<NodeJS.Timeout | null>(null);
@@ -49,8 +48,6 @@ export function StreamingText({
 
     // Start typing animation
     if (indexRef.current < text.length) {
-      setShowCursor(true);
-
       intervalRef.current = setInterval(() => {
         if (indexRef.current < text.length) {
           indexRef.current++;
@@ -61,19 +58,14 @@ export function StreamingText({
             clearInterval(intervalRef.current);
           }
           
-          // Keep cursor blinking for a moment, then hide
-          setTimeout(() => {
-            setShowCursor(false);
-            if (onComplete && !isStreaming) {
-              onComplete();
-            }
-          }, 500);
+          if (onComplete && !isStreaming) {
+            onComplete();
+          }
         }
       }, speed);
     } else if (!isStreaming) {
       // Text is already fully displayed
       setDisplayedText(text);
-      setShowCursor(false);
     }
 
     return () => {
@@ -84,13 +76,8 @@ export function StreamingText({
   }, [text, speed, onComplete, isStreaming]);
 
   return (
-    <span className={`inline ${className}`}>
+    <span className={`inline-block ${className}`} style={{ whiteSpace: 'pre-wrap' }}>
       {displayedText}
-      {showCursor && (
-        <span className="inline-block w-0.5 h-4 ml-0.5 bg-current animate-pulse align-middle">
-          ▌
-        </span>
-      )}
     </span>
   );
 }

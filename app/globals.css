@@ -14,15 +14,7 @@
   --font-sans: var(--font-red-hat);
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #1f1f1f;
-    --foreground: #e8eaed;
-    --accent: rgb(184, 140, 120);
-    --accent-hover: rgb(164, 120, 100);
-    --accent-light: rgba(184, 140, 120, 0.15);
-  }
-}
+/* Dark mode disabled - enforce light theme only */
 
 * {
   -webkit-font-smoothing: antialiased;
@@ -70,6 +62,17 @@ body {
   }
 }
 
+@keyframes slide-in-from-top-2 {
+  from {
+    transform: translateY(-8px);
+    opacity: 0;
+  }
+  to {
+    transform: translateY(0);
+    opacity: 1;
+  }
+}
+
 .animate-in {
   animation-fill-mode: both;
 }
@@ -86,6 +89,10 @@ body {
   animation-name: slide-in-from-bottom-2;
 }
 
+.slide-in-from-top-2 {
+  animation-name: slide-in-from-top-2;
+}
+
 .duration-200 {
   animation-duration: 200ms;
 }
@@ -96,6 +103,10 @@ body {
 
 .duration-700 {
   animation-duration: 700ms;
+}
+
+.duration-300 {
+  animation-duration: 300ms;
 }
 
 /* Custom scrollbar for better aesthetics */
@@ -172,4 +183,61 @@ body {
 
 .animate-pulse {
   animation: pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+}
+
+/* Hide scrollbar */
+.scrollbar-hide {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+
+.scrollbar-hide::-webkit-scrollbar {
+  display: none;
+}
+
+/* Mobile-specific optimizations */
+@media (max-width: 767px) {
+  /* Prevent horizontal scrolling */
+  body {
+    overflow-x: hidden;
+  }
+  
+  /* Ensure proper mobile viewport */
+  html {
+    -webkit-text-size-adjust: 100%;
+    -ms-text-size-adjust: 100%;
+  }
+  
+  /* Better touch targets */
+  button, a {
+    min-height: 44px;
+    min-width: 44px;
+  }
+  
+  /* Prevent zoom on input focus */
+  input, textarea, select {
+    font-size: 16px;
+  }
+  
+  /* Force mobile layout */
+  .mobile-force {
+    padding-left: 1rem !important;
+    padding-right: 1rem !important;
+  }
+  
+  /* Ensure mobile spacing */
+  .mobile-spacing {
+    padding: 0.75rem !important;
+  }
+  
+  /* Mobile-specific sizing */
+  .mobile-logo {
+    width: 4rem !important;
+    height: 4rem !important;
+  }
+  
+  .mobile-video {
+    width: 8rem !important;
+    height: 8rem !important;
+  }
 }
