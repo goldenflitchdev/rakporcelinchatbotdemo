@@ -123,13 +123,20 @@ follow-up question!`;
     
     console.log('Calling OpenAI for completion...');
     
-    // Build conversation history properly
+    // Build conversation history with explicit context
     const conversationMessages = [];
     
-    // Add system prompt
-    conversationMessages.push({ role: 'system' as const, content: SYSTEM_PROMPT });
+    // Enhanced system prompt with conversation awareness
+    const contextAwareSystemPrompt = `${SYSTEM_PROMPT}
+
+CONVERSATION CONTEXT:
+You are in an ongoing conversation. The user has already asked ${Math.floor(messages.length / 2)} question(s).
+Pay attention to what has been discussed and reference it naturally in your responses.
+When user asks follow-up questions like "what about...", "tell me more", "and...?", acknowledge what you previously discussed.`;
     
-    // Add all previous messages from the conversation
+    conversationMessages.push({ role: 'system' as const, content: contextAwareSystemPrompt });
+    
+    // Add all previous messages from the conversation (maintain full history)
     for (let i = 0; i < messages.length - 1; i++) {
       conversationMessages.push({
         role: messages[i].role as 'user' | 'assistant',
@@ -140,7 +147,7 @@ follow-up question!`;
     // Add current user message with context
     conversationMessages.push({ role: 'user' as const, content: finalPrompt });
     
-    console.log(`Conversation history: ${conversationMessages.length} messages`);
+    console.log(`Conversation history: ${messages.length} total messages, ${conversationMessages.length} sent to AI`);
     
     const completion = await openai.chat.completions.create({
       model: CHAT_MODEL,
