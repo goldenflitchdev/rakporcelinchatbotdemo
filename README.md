@@ -658,6 +658,37 @@ ls -la data/vector-store.json
 
 ## 📜 Changelog
 
+### **[v1.2.4] - 2025-10-28** ✨
+
+#### ✨ **Professional Streaming Text Component (ChatGPT-Style)**
+- **Dedicated StreamingText component** - Reusable, clean architecture
+- Character-by-character typing with ChatGPT-style cursor (▌)
+- Configurable typing speed (default: 20ms = 50 chars/second)
+- Smooth blinking cursor animation (animate-pulse)
+- Cursor disappears 500ms after completion
+- Ready for WebSocket/SSE streaming (progressive rendering)
+- Props: text, speed, onComplete, isStreaming, className
+- Auto-cleanup prevents memory leaks
+- Natural, lag-free performance
+
+#### 🎯 **Component Features**
+- ✅ Static text animation (types out full string)
+- ✅ Streaming support (appends chunks as they arrive)
+- ✅ Callback when animation completes
+- ✅ Customizable speed and styling
+- ✅ Professional cursor blink effect
+- ✅ Responsive and performant
+
+#### 🏗️ **Code Quality**
+- Separated streaming logic into reusable component
+- Clean separation of concerns
+- Easier to maintain and extend
+- TypeScript interfaces for type safety
+- Proper cleanup on unmount
+- 82 lines of focused, professional code
+
+---
+
 ### **[v1.2.3] - 2025-10-28** ⚡
 
 #### ⚡ **MASSIVE Performance Optimization (3-50x Faster!)**
