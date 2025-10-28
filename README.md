@@ -658,6 +658,27 @@ ls -la data/vector-store.json
 
 ## 📜 Changelog
 
+### **[v1.1.4] - 2025-10-28**
+
+#### 🔧 **Fixed Conversation Context Retention**
+- **Full conversation history** now properly maintained
+- AI remembers all previous questions and answers
+- Enhanced system prompt with conversation turn tracking
+- AI explicitly instructed to reference previous topics
+- Better follow-up question handling
+- Dynamic context awareness (tells AI how many turns have occurred)
+- Proper message history building in API
+- Logs conversation length for debugging
+
+#### 💬 **Context-Aware Responses**
+- AI now says things like "In addition to the plates we discussed..."
+- References earlier parts of conversation naturally
+- Builds on previous topics
+- Feels like continuous conversation, not isolated Q&A
+- Multi-turn conversations work seamlessly
+
+---
+
 ### **[v1.1.3] - 2025-10-28**
 
 #### 🧠 **Massively Enhanced Product Intelligence**
