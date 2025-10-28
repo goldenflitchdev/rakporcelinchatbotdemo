@@ -4,6 +4,13 @@ import { queryChunks } from '@/lib/chroma';
 import { SYSTEM_PROMPT, createUserPromptWithContext } from '@/lib/prompts';
 import { CHAT_MODEL, TOP_K, TEMPERATURE } from '@/lib/config';
 import { ensureSeeded } from '@/lib/ensure-seeded';
+import { 
+  detectProductIntent, 
+  searchProducts, 
+  getProductsByCategory,
+  getProductsByCollection,
+  type ProductResult 
+} from '@/lib/product-search';
 
 export const runtime = 'nodejs';
 export const dynamic = 'force-dynamic';
@@ -47,7 +54,26 @@ export async function POST(req: NextRequest) {
 
     const userQuery = lastUserMessage.content;
 
-    // Step 1: Create embedding for the user query
+    // Step 1: Detect if user is asking about products
+    const productIntent = await detectProductIntent(userQuery);
+    let products: ProductResult[] = [];
+
+    if (productIntent.hasProductIntent) {
+      console.log('Product intent detected:', productIntent);
+      
+      // Search for relevant products
+      if (productIntent.collection) {
+        products = await getProductsByCollection(productIntent.collection, 5);
+      } else if (productIntent.category) {
+        products = await getProductsByCategory(productIntent.category, 5);
+      } else if (productIntent.searchTerm) {
+        products = await searchProducts(productIntent.searchTerm, 5);
+      }
+      
+      console.log(`Found ${products.length} relevant products`);
+    }
+
+    // Step 2: Create embedding for the user query
     console.log('Creating embedding for query:', userQuery);
     const queryEmbedding = await createEmbedding(userQuery);
 
@@ -102,6 +128,7 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({
       message: assistantMessage,
       sources,
+      products: products.length > 0 ? products : undefined, // Include products if found
       usage: {
         promptTokens: completion.usage?.prompt_tokens,
         completionTokens: completion.usage?.completion_tokens,
