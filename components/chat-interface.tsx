@@ -273,7 +273,7 @@ export function ChatInterface() {
                           </div>
 
                           {/* Product Thumbnails - Show even while typing */}
-                          {message.products && message.products.length > 0 ? (
+                          {message.products && message.products.length > 0 && (
                             <div className="pt-4 mt-4 space-y-3 animate-in fade-in duration-500">
                               <p className="text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wide">
                                 Featured Products ({message.products.length})
