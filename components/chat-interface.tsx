@@ -296,14 +296,14 @@ export function ChatInterface() {
 
       {/* Messages Area */}
       <div className="flex-1 overflow-y-auto">
-        <div className="max-w-5xl mx-auto px-6 md:px-8 py-8">
+        <div className="max-w-5xl mx-auto px-6 md:px-8 py-8 pt-12">
           {/* Welcome Screen */}
           {showWelcome && messages.length === 0 && (
             <div className="flex flex-col justify-center items-center h-full space-y-8 animate-in fade-in duration-700">
               <div className="text-center space-y-6">
-                {/* Brand Video */}
+                {/* Brand Video - 1.6x size (128px * 1.6 = 204.8px ~ 52 in tailwind) */}
                 <div className="inline-flex items-center justify-center">
-                  <div className="relative w-32 h-32 rounded-full overflow-hidden shadow-2xl border-4 border-white ring-2 ring-gray-200">
+                  <div className="relative w-52 h-52 rounded-full overflow-hidden shadow-2xl border-4 border-white ring-2 ring-gray-200">
                     <video
                       autoPlay
                       loop
@@ -318,9 +318,9 @@ export function ChatInterface() {
                         <Image 
                           src="/rak-logo.svg" 
                           alt="RAK Porcelain" 
-                          width={96} 
-                          height={96}
-                          className="w-24 h-24"
+                          width={160} 
+                          height={160}
+                          className="w-40 h-40"
                         />
                       </div>
                     </video>
@@ -648,7 +648,7 @@ export function ChatInterface() {
         <div className="max-w-5xl mx-auto px-6 md:px-8 py-6">
           {/* Suggested Questions - Show when welcome is visible */}
           {showWelcome && messages.length === 0 && (
-            <div className="mb-4 pb-4 border-b border-gray-200">
+            <div className="mb-6">
               <p className="text-xs font-medium text-gray-500 mb-3 uppercase tracking-wide">
                 Quick Start
               </p>
