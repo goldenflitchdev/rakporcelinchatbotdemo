@@ -115,7 +115,7 @@ export function ChatInterface() {
         <div className="max-w-5xl mx-auto flex items-center justify-between">
           <div className="flex items-center gap-3">
             <div className="relative">
-              <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-blue-500 via-purple-500 to-pink-500 flex items-center justify-center shadow-lg">
+              <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-[rgb(164,120,100)] to-[rgb(144,100,80)] flex items-center justify-center shadow-lg">
                 <Sparkles className="w-5 h-5 text-white" strokeWidth={2.5} />
               </div>
               <div className="absolute -bottom-1 -right-1 w-3 h-3 bg-green-500 rounded-full border-2 border-white dark:border-[#1f1f1f]"></div>
@@ -139,7 +139,7 @@ export function ChatInterface() {
           {showWelcome && messages.length === 0 && (
             <div className="space-y-8 animate-in fade-in duration-700">
               <div className="text-center space-y-4 py-12">
-                <div className="inline-flex items-center justify-center w-20 h-20 rounded-3xl bg-gradient-to-br from-blue-500 via-purple-500 to-pink-500 shadow-2xl mb-4">
+                <div className="inline-flex items-center justify-center w-20 h-20 rounded-3xl bg-gradient-to-br from-[rgb(164,120,100)] to-[rgb(144,100,80)] shadow-2xl mb-4">
                   <Sparkles className="w-10 h-10 text-white" strokeWidth={2} />
                 </div>
                 <h2 className="text-4xl md:text-5xl font-bold text-gray-900 dark:text-gray-100 tracking-tight">
@@ -157,9 +157,9 @@ export function ChatInterface() {
                   <button
                     key={index}
                     onClick={() => setInput(question)}
-                    className="group p-4 text-left rounded-2xl border border-gray-200 dark:border-gray-700 hover:border-blue-500 dark:hover:border-blue-400 hover:bg-blue-50 dark:hover:bg-blue-950/20 transition-all duration-200 hover:shadow-md"
+                    className="group p-4 text-left rounded-2xl border border-gray-200 dark:border-gray-700 hover:border-[rgb(164,120,100)] dark:hover:border-[rgb(184,140,120)] hover:bg-[rgba(164,120,100,0.05)] dark:hover:bg-[rgba(184,140,120,0.1)] transition-all duration-200 hover:shadow-md"
                   >
-                    <p className="text-sm text-gray-700 dark:text-gray-300 group-hover:text-blue-700 dark:group-hover:text-blue-300 leading-relaxed">
+                    <p className="text-sm text-gray-700 dark:text-gray-300 group-hover:text-[rgb(144,100,80)] dark:group-hover:text-[rgb(184,140,120)] leading-relaxed">
                       {question}
                     </p>
                   </button>
@@ -180,7 +180,7 @@ export function ChatInterface() {
               >
                 {message.role === 'assistant' && (
                   <div className="flex-shrink-0">
-                    <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-blue-500 via-purple-500 to-pink-500 flex items-center justify-center shadow-lg">
+                    <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-[rgb(164,120,100)] to-[rgb(144,100,80)] flex items-center justify-center shadow-lg">
                       <Sparkles className="w-5 h-5 text-white" strokeWidth={2.5} />
                     </div>
                   </div>
@@ -191,7 +191,7 @@ export function ChatInterface() {
                   message.role === 'user' && 'flex justify-end'
                 )}>
                   {message.role === 'user' ? (
-                    <div className="inline-block px-6 py-4 rounded-3xl bg-blue-600 text-white shadow-lg">
+                    <div className="inline-block px-6 py-4 rounded-full bg-[rgb(164,120,100)] text-white shadow-lg">
                       <p className="text-[15px] leading-relaxed whitespace-pre-wrap break-words">
                         {message.content}
                       </p>
@@ -223,7 +223,7 @@ export function ChatInterface() {
                                     href={source}
                                     target="_blank"
                                     rel="noopener noreferrer"
-                                    className="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs rounded-full bg-blue-50 dark:bg-blue-950/30 text-blue-700 dark:text-blue-300 hover:bg-blue-100 dark:hover:bg-blue-950/50 transition-colors group"
+                                    className="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs rounded-full bg-[rgba(164,120,100,0.1)] dark:bg-[rgba(184,140,120,0.15)] text-[rgb(144,100,80)] dark:text-[rgb(184,140,120)] hover:bg-[rgba(164,120,100,0.2)] dark:hover:bg-[rgba(184,140,120,0.25)] transition-colors group"
                                   >
                                     <ExternalLink className="w-3 h-3 group-hover:scale-110 transition-transform" />
                                     <span className="max-w-[200px] truncate">
@@ -269,14 +269,14 @@ export function ChatInterface() {
       <div className="border-t border-gray-200 dark:border-gray-800 bg-white/80 dark:bg-[#1f1f1f]/80 backdrop-blur-sm">
         <div className="max-w-5xl mx-auto px-6 md:px-8 py-6">
           <form onSubmit={handleSubmit} className="relative">
-            <div className="relative flex items-end gap-3 p-2 rounded-3xl border-2 border-gray-200 dark:border-gray-700 focus-within:border-blue-500 dark:focus-within:border-blue-400 bg-white dark:bg-[#2a2a2a] transition-all shadow-lg shadow-gray-200/50 dark:shadow-black/50">
+            <div className="relative flex items-end gap-3 p-2 rounded-full border-2 border-gray-200 dark:border-gray-700 focus-within:border-[rgb(164,120,100)] dark:focus-within:border-[rgb(184,140,120)] bg-white dark:bg-[#2a2a2a] transition-all shadow-lg shadow-gray-200/50 dark:shadow-black/50">
               <textarea
                 ref={inputRef}
                 value={input}
                 onChange={(e) => setInput(e.target.value)}
                 onKeyDown={handleKeyDown}
                 placeholder="Ask me anything about RAK Porcelain..."
-                className="flex-1 resize-none bg-transparent px-4 py-3 text-[15px] text-gray-900 dark:text-gray-100 placeholder:text-gray-400 dark:placeholder:text-gray-500 focus:outline-none leading-relaxed"
+                className="flex-1 resize-none bg-transparent px-6 py-3 text-[15px] text-gray-900 dark:text-gray-100 placeholder:text-gray-400 dark:placeholder:text-gray-500 focus:outline-none leading-relaxed"
                 rows={1}
                 disabled={isLoading}
                 style={{
@@ -293,10 +293,10 @@ export function ChatInterface() {
                 type="submit"
                 disabled={isLoading || !input.trim()}
                 className={cn(
-                  "flex-shrink-0 p-3 rounded-2xl transition-all duration-200",
+                  "flex-shrink-0 p-3 rounded-full transition-all duration-200",
                   isLoading || !input.trim()
                     ? "bg-gray-200 dark:bg-gray-700 text-gray-400 dark:text-gray-500 cursor-not-allowed"
-                    : "bg-blue-600 hover:bg-blue-700 text-white shadow-lg shadow-blue-500/30 hover:shadow-xl hover:shadow-blue-500/40 hover:scale-105"
+                    : "bg-[rgb(164,120,100)] hover:bg-[rgb(144,100,80)] text-white shadow-lg shadow-[rgba(164,120,100,0.3)] hover:shadow-xl hover:shadow-[rgba(164,120,100,0.4)] hover:scale-105"
                 )}
               >
                 {isLoading ? (
