@@ -658,6 +658,36 @@ ls -la data/vector-store.json
 
 ## 📜 Changelog
 
+### **[v1.2.2] - 2025-10-28**
+
+#### 💬 **Sentence-by-Sentence Streaming with Thinking Pauses**
+- **Revolutionary response flow** - Streams ONE SENTENCE AT A TIME
+- Shows "_Thinking..._" (italicized) between sentences
+- 800ms thinking pause before each new sentence
+- Each sentence types character-by-character (30ms/char)
+- 300ms pause between sentences for natural rhythm
+- Creates incredibly human-like conversation feel
+
+#### 🎭 **Natural Conversation Experience**
+```
+Sentence 1 types out: "Great! Here are some beautiful plates."
+[Thinking... 800ms]
+Sentence 2 types out: "We have Classic Gourmet and Banquet collections."
+[Thinking... 800ms]  
+Sentence 3 types out: "Would you like to see specific products?"
+Done!
+```
+
+#### 🎯 **User Experience Benefits**
+- Doesn't feel like waiting for long response
+- Each thought comes naturally and individually
+- "Thinking..." creates anticipation
+- Engaging, dynamic interaction
+- Like chatting with real person who pauses to think
+- Product thumbnails visible throughout
+
+---
+
 ### **[v1.2.1] - 2025-10-28**
 
 #### ✨ **Typewriter Effect & Always-Show Products**
