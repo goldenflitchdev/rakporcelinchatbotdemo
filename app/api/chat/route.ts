@@ -16,6 +16,7 @@ import { query as dbQuery } from '@/lib/postgres';
 import { searchByAesthetic } from '@/lib/aesthetic-vector-store';
 import { getResponseCache } from '@/lib/response-cache';
 import { searchByAestheticProfile, extractAestheticQuery } from '@/lib/aesthetic-search';
+import { searchByVisualCharacteristics, extractVisualQuery } from '@/lib/visual-search';
 
 export const runtime = 'nodejs';
 export const dynamic = 'force-dynamic';
@@ -76,18 +77,63 @@ export async function POST(req: NextRequest) {
     // OPTIMIZED: Fast parallel processing
     console.log('⚡ Fast processing...');
     
-    const [queryEmbedding, productIntent, aestheticIntent] = await Promise.all([
+    const [queryEmbedding, productIntent, aestheticIntent, visualIntent] = await Promise.all([
       createEmbedding(userQuery),                 // Create embedding
       detectProductIntent(userQuery),             // Detect product intent
       Promise.resolve(extractAestheticQuery(userQuery)), // Check for aesthetic query
+      Promise.resolve(extractVisualQuery(userQuery)), // Check for visual query
     ]);
     
     // Search for products and context in parallel
     let products: ProductResult[] = [];
     const relevantChunksPromise = queryChunks(queryEmbedding, TOP_K);
     
-    // Try aesthetic search first for style-based queries
-    if (aestheticIntent.hasAestheticIntent) {
+    // Try visual AI search first for highly specific visual queries
+    if (visualIntent.hasVisualIntent) {
+      console.log('👁️  Visual AI search detected...');
+      const visualResults = await searchByVisualCharacteristics(userQuery, visualIntent.params, 5);
+      
+      if (visualResults.length > 0) {
+        // Get product details for visual matches
+        const productIds = visualResults.map((r: any) => r.productId);
+        try {
+          const productDetails = await dbQuery<{
+            id: number;
+            product_name: string;
+            product_code: string;
+            product_description: string;
+            product_images: any;
+            locale: string;
+            material: string;
+            shape: string;
+          }>(
+            `SELECT id, product_name, product_code, product_description,
+                    product_images, locale, material, shape
+             FROM products
+             WHERE id = ANY($1)`,
+            [productIds]
+          );
+
+          products = productDetails.map(p => ({
+            id: p.id,
+            name: p.product_name,
+            code: p.product_code,
+            description: p.product_description || '',
+            imageUrl: extractImageUrl(p.product_images),
+            productUrl: `https://www.rakporcelain.com/${p.locale}/products/${p.product_code}`,
+            material: p.material,
+            shape: p.shape,
+          }));
+          
+          console.log(`✅ ${products.length} visual AI matches`);
+        } catch (error) {
+          console.error('Error fetching visual product details:', error);
+        }
+      }
+    }
+    
+    // Fallback to aesthetic search if no visual results
+    if (products.length === 0 && aestheticIntent.hasAestheticIntent) {
       console.log('🎨 Aesthetic search detected...');
       const aestheticResults = await searchByAestheticProfile(userQuery, aestheticIntent.params, 5);
       
