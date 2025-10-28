@@ -52,8 +52,10 @@ export async function searchProducts(
            OR LOWER(product_code) LIKE LOWER($1)
            OR LOWER(product_description) LIKE LOWER($1)
            OR LOWER(description) LIKE LOWER($1)
+           OR LOWER(material) LIKE LOWER($1)
+           OR LOWER(shape) LIKE LOWER($1)
          )
-       ORDER BY updated_at DESC
+       ORDER BY RANDOM()
        LIMIT $2`,
       [`%${searchQuery}%`, limit]
     );
@@ -124,7 +126,7 @@ export async function getProductsByCategory(
        WHERE scc.category_id = $1
          AND p.published_at IS NOT NULL
          AND p.product_images IS NOT NULL
-       ORDER BY p.updated_at DESC
+       ORDER BY RANDOM()
        LIMIT $2`,
       [category.id, limit]
     );
@@ -191,7 +193,7 @@ export async function getProductsByCollection(
        WHERE pc.collection_id = $1
          AND p.published_at IS NOT NULL
          AND p.product_images IS NOT NULL
-       ORDER BY p.updated_at DESC
+       ORDER BY RANDOM()
        LIMIT $2`,
       [collection.id, limit]
     );

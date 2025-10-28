@@ -61,16 +61,30 @@ export async function POST(req: NextRequest) {
     if (productIntent.hasProductIntent) {
       console.log('Product intent detected:', productIntent);
       
-      // Search for relevant products
+      // SMART HIERARCHICAL SEARCH:
+      // 1. Collection (most specific)
+      // 2. Category (medium specific) 
+      // 3. General keyword search (broad)
+      // This ensures relevant, varied results
+      
       if (productIntent.collection) {
+        console.log(`🎨 Searching collection: ${productIntent.collection}`);
         products = await getProductsByCollection(productIntent.collection, 5);
-      } else if (productIntent.category) {
+      }
+      
+      // Fallback to category if no collection results
+      if (products.length === 0 && productIntent.category) {
+        console.log(`📂 Searching category: ${productIntent.category}`);
         products = await getProductsByCategory(productIntent.category, 5);
-      } else if (productIntent.searchTerm) {
+      }
+      
+      // Fallback to general search if still no results
+      if (products.length === 0 && productIntent.searchTerm) {
+        console.log(`🔍 General search: ${productIntent.searchTerm}`);
         products = await searchProducts(productIntent.searchTerm, 5);
       }
       
-      console.log(`Found ${products.length} relevant products`);
+      console.log(`✅ Found ${products.length} relevant products to display`);
     }
 
     // Step 2: Create embedding for the user query
