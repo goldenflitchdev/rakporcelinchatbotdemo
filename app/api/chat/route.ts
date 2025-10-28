@@ -15,6 +15,8 @@ import { analyzeQuery, buildSmartDatabaseQuery } from '@/lib/query-analyzer';
 import { query as dbQuery } from '@/lib/postgres';
 import { searchByAesthetic } from '@/lib/aesthetic-vector-store';
 import { getResponseCache } from '@/lib/response-cache';
+import { searchByAestheticProfile, extractAestheticQuery } from '@/lib/aesthetic-search';
+import { searchByVisualCharacteristics, extractVisualQuery } from '@/lib/visual-search';
 
 export const runtime = 'nodejs';
 export const dynamic = 'force-dynamic';
@@ -72,21 +74,111 @@ export async function POST(req: NextRequest) {
       });
     }
 
-    // OPTIMIZED: Skip AI analysis for speed, use simple detection
+    // OPTIMIZED: Fast parallel processing
     console.log('⚡ Fast processing...');
     
-    const [queryEmbedding, productIntent] = await Promise.all([
+    const [queryEmbedding, productIntent, aestheticIntent, visualIntent] = await Promise.all([
       createEmbedding(userQuery),                 // Create embedding
       detectProductIntent(userQuery),             // Detect product intent
+      Promise.resolve(extractAestheticQuery(userQuery)), // Check for aesthetic query
+      Promise.resolve(extractVisualQuery(userQuery)), // Check for visual query
     ]);
     
     // Search for products and context in parallel
     let products: ProductResult[] = [];
     const relevantChunksPromise = queryChunks(queryEmbedding, TOP_K);
     
-    // ALWAYS try to find products if ANY product keyword detected
-    if (productIntent.hasProductIntent) {
-      const searchTerm = productIntent.searchTerm || 'plate'; // Default to plates
+    // Try visual AI search first for highly specific visual queries
+    if (visualIntent.hasVisualIntent) {
+      console.log('👁️  Visual AI search detected...');
+      const visualResults = await searchByVisualCharacteristics(userQuery, visualIntent.params, 5);
+      
+      if (visualResults.length > 0) {
+        // Get product details for visual matches
+        const productIds = visualResults.map((r: any) => r.productId);
+        try {
+          const productDetails = await dbQuery<{
+            id: number;
+            product_name: string;
+            product_code: string;
+            product_description: string;
+            product_images: any;
+            locale: string;
+            material: string;
+            shape: string;
+          }>(
+            `SELECT id, product_name, product_code, product_description,
+                    product_images, locale, material, shape
+             FROM products
+             WHERE id = ANY($1)`,
+            [productIds]
+          );
+
+          products = productDetails.map(p => ({
+            id: p.id,
+            name: p.product_name,
+            code: p.product_code,
+            description: p.product_description || '',
+            imageUrl: extractImageUrl(p.product_images),
+            productUrl: `https://www.rakporcelain.com/${p.locale}/products/${p.product_code}`,
+            material: p.material,
+            shape: p.shape,
+          }));
+          
+          console.log(`✅ ${products.length} visual AI matches`);
+        } catch (error) {
+          console.error('Error fetching visual product details:', error);
+        }
+      }
+    }
+    
+    // Fallback to aesthetic search if no visual results
+    if (products.length === 0 && aestheticIntent.hasAestheticIntent) {
+      console.log('🎨 Aesthetic search detected...');
+      const aestheticResults = await searchByAestheticProfile(userQuery, aestheticIntent.params, 5);
+      
+      if (aestheticResults.length > 0) {
+        // Get product details for aesthetic matches
+        const productIds = aestheticResults.map((r: any) => r.productId);
+        try {
+          const productDetails = await dbQuery<{
+            id: number;
+            product_name: string;
+            product_code: string;
+            product_description: string;
+            product_images: any;
+            locale: string;
+            material: string;
+            shape: string;
+          }>(
+            `SELECT id, product_name, product_code, product_description,
+                    product_images, locale, material, shape
+             FROM products
+             WHERE id = ANY($1)`,
+            [productIds]
+          );
+
+          products = productDetails.map(p => ({
+            id: p.id,
+            name: p.product_name,
+            code: p.product_code,
+            description: p.product_description || '',
+            imageUrl: extractImageUrl(p.product_images),
+            productUrl: `https://www.rakporcelain.com/${p.locale}/products/${p.product_code}`,
+            material: p.material,
+            shape: p.shape,
+          }));
+          
+          console.log(`✅ ${products.length} aesthetic matches`);
+        } catch (error) {
+          console.error('Error fetching aesthetic product details:', error);
+        }
+      }
+    }
+    
+    // Fallback to regular search if no aesthetic results
+    if (products.length === 0 && productIntent.hasProductIntent) {
+      const searchTerm = productIntent.searchTerm || 'plate';
       
       console.log(`🔍 Searching: ${searchTerm}`);
       
@@ -98,14 +190,33 @@ export async function POST(req: NextRequest) {
         products = await searchProducts(searchTerm, 5);
       }
       
-      // Fallback: if no products found, show random plates
+      // Final fallback: show random plates
       if (products.length === 0) {
-        console.log('🎲 No specific match, showing random products...');
+        console.log('🎲 Showing random products...');
         products = await searchProducts('plate', 5);
       }
       
       console.log(`✅ ${products.length} products ready`);
     }
+
+// Helper function for image extraction
+function extractImageUrl(productImages: any): string {
+  const placeholder = 'https://via.placeholder.com/400x400/f3f4f6/9ca3af?text=RAK+Porcelain';
+  if (!productImages) return placeholder;
+  try {
+    if (typeof productImages === 'string') {
+      productImages = JSON.parse(productImages);
+    }
+    if (Array.isArray(productImages) && productImages.length > 0) {
+      if (productImages[0].publicUrl) return productImages[0].publicUrl;
+      if (productImages[0].url) return productImages[0].url;
+    }
+    if (productImages.publicUrl) return productImages.publicUrl;
+    return placeholder;
+  } catch {
+    return placeholder;
+  }
+}
 
     // Get context results
     const relevantChunks = await relevantChunksPromise;

@@ -1,9 +1,10 @@
 'use client';
 
 import { useState, useRef, useEffect } from 'react';
-import { Send, Loader2, AlertCircle, ExternalLink, Sparkles, User } from 'lucide-react';
+import { Send, Loader2, AlertCircle, Sparkles, User, Tag, ChevronDown, ChevronUp, Image as ImageIcon, X } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { StreamingText } from './streaming-text';
+import Image from 'next/image';
 
 interface ProductCard {
   id: number;
@@ -14,6 +15,16 @@ interface ProductCard {
   productUrl: string;
   collection?: string;
   category?: string;
+}
+
+interface SubCategory {
+  id: number;
+  name: string;
+  description: string;
+  category: string;
+  productCount: number;
+  url: string;
+  categoryUrl: string;
 }
 
 interface Message {
@@ -34,6 +45,12 @@ export function ChatInterface() {
   const [showWelcome, setShowWelcome] = useState(true);
   const [typingText, setTypingText] = useState('');
   const [isTyping, setIsTyping] = useState(false);
+  const [expandedSections, setExpandedSections] = useState<Record<number, { categories: boolean; subcategories: boolean }>>({});
+  const [uploadedImage, setUploadedImage] = useState<string | null>(null);
+  const [isAnalyzingImage, setIsAnalyzingImage] = useState(false);
+  const fileInputRef = useRef<HTMLInputElement>(null);
+  const [randomSubCategories, setRandomSubCategories] = useState<SubCategory[]>([]);
+  const [isLoadingSubCategories, setIsLoadingSubCategories] = useState(false);
 
   const scrollToBottom = () => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
@@ -47,8 +64,199 @@ export function ChatInterface() {
     inputRef.current?.focus();
   }, []);
 
+  // Fetch random dinnerware collections on component mount
+  useEffect(() => {
+    const fetchRandomDinnerwareCollections = async () => {
+      setIsLoadingSubCategories(true);
+      try {
+        const count = Math.floor(Math.random() * 5) + 3; // Random between 3-7
+        const response = await fetch(`/api/dinnerware-collections?count=${count}`);
+        const data = await response.json();
+        
+        if (data.subcategories) {
+          setRandomSubCategories(data.subcategories);
+        }
+      } catch (error) {
+        console.error('Error fetching dinnerware collections:', error);
+      } finally {
+        setIsLoadingSubCategories(false);
+      }
+    };
+
+    fetchRandomDinnerwareCollections();
+  }, []);
+
+  // Function to refresh dinnerware collections
+  const refreshSubCategories = async () => {
+    setIsLoadingSubCategories(true);
+    try {
+      const count = Math.floor(Math.random() * 5) + 3; // Random between 3-7
+      const response = await fetch(`/api/dinnerware-collections?count=${count}`);
+      const data = await response.json();
+      
+      if (data.subcategories) {
+        setRandomSubCategories(data.subcategories);
+      }
+    } catch (error) {
+      console.error('Error fetching dinnerware collections:', error);
+    } finally {
+      setIsLoadingSubCategories(false);
+    }
+  };
+
+  // Handle paste event for images
+  useEffect(() => {
+    const handlePaste = (e: ClipboardEvent) => {
+      const items = e.clipboardData?.items;
+      if (!items) return;
+
+      for (let i = 0; i < items.length; i++) {
+        const item = items[i];
+        
+        // Check if pasted item is an image
+        if (item.type.indexOf('image') !== -1) {
+          e.preventDefault();
+          const file = item.getAsFile();
+          
+          if (file) {
+            // Check file size (max 4MB)
+            if (file.size > 4 * 1024 * 1024) {
+              setError('Image size must be less than 4MB');
+              return;
+            }
+
+            const reader = new FileReader();
+            reader.onloadend = () => {
+              setUploadedImage(reader.result as string);
+              setError(null);
+            };
+            reader.readAsDataURL(file);
+          }
+          break;
+        }
+      }
+    };
+
+    // Add paste event listener to document
+    document.addEventListener('paste', handlePaste);
+
+    return () => {
+      document.removeEventListener('paste', handlePaste);
+    };
+  }, []);
+
+  const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    // Check file size (max 4MB)
+    if (file.size > 4 * 1024 * 1024) {
+      setError('Image size must be less than 4MB');
+      return;
+    }
+
+    // Check file type
+    if (!file.type.startsWith('image/')) {
+      setError('Please upload an image file');
+      return;
+    }
+
+    const reader = new FileReader();
+    reader.onloadend = () => {
+      setUploadedImage(reader.result as string);
+    };
+    reader.readAsDataURL(file);
+  };
+
+  const handleImageSearch = async () => {
+    if (!uploadedImage) return;
+
+    const userQuery = input.trim() || 'Find me similar products to this image';
+    setInput('');
+    setError(null);
+    setShowWelcome(false);
+    setIsAnalyzingImage(true);
+
+    // Add user message with image and query
+    setMessages(prev => [...prev, { 
+      role: 'user', 
+      content: `🖼️ ${userQuery}` 
+    }]);
+
+    // Add loading placeholder
+    setMessages(prev => [...prev, { 
+      role: 'assistant', 
+      content: '', 
+      isStreaming: true 
+    }]);
+
+    try {
+      const response = await fetch('/api/analyze-image', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ 
+          image: uploadedImage,
+          query: userQuery 
+        }),
+      });
+
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.error || 'Failed to analyze image');
+      }
+
+      const data = await response.json();
+
+      // Update message with results
+      setMessages(prev => {
+        const newMessages = [...prev];
+        newMessages[newMessages.length - 1] = {
+          role: 'assistant',
+          content: data.message,
+          products: data.products,
+          isStreaming: true,
+        };
+        return newMessages;
+      });
+
+      // Mark as complete
+      setTimeout(() => {
+        setMessages(prev => {
+          const newMessages = [...prev];
+          if (newMessages.length > 0) {
+            newMessages[newMessages.length - 1] = {
+              ...newMessages[newMessages.length - 1],
+              isStreaming: false,
+            };
+          }
+          return newMessages;
+        });
+      }, data.message.length * 25);
+
+      // Clear uploaded image
+      setUploadedImage(null);
+      if (fileInputRef.current) {
+        fileInputRef.current.value = '';
+      }
+    } catch (err) {
+      console.error('Image analysis error:', err);
+      setError(err instanceof Error ? err.message : 'Failed to analyze image');
+      setMessages(prev => prev.slice(0, -1));
+    } finally {
+      setIsAnalyzingImage(false);
+    }
+  };
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    
+    // If there's an uploaded image, handle image search instead
+    if (uploadedImage) {
+      await handleImageSearch();
+      return;
+    }
     
     if (!input.trim() || isLoading) return;
 
@@ -149,24 +357,46 @@ export function ChatInterface() {
     "Tell me about B2B options"
   ];
 
+  const [isMobile, setIsMobile] = useState(false);
+  const [isClient, setIsClient] = useState(false);
+
+  // Check if mobile on mount and resize
+  useEffect(() => {
+    setIsClient(true);
+    const checkMobile = () => {
+      setIsMobile(window.innerWidth < 768);
+    };
+    
+    checkMobile();
+    window.addEventListener('resize', checkMobile);
+    
+    return () => window.removeEventListener('resize', checkMobile);
+  }, []);
+
+  // Mobile: show only first 2 questions
+  const mobileSuggestedQuestions = suggestedQuestions.slice(0, 2);
+
   return (
-    <div className="flex flex-col h-screen bg-white dark:bg-[#1f1f1f]">
+    <div className="flex flex-col h-screen bg-white overflow-hidden">
       {/* Header */}
-      <header className="border-b border-gray-200 dark:border-gray-800 px-6 md:px-8 py-4 bg-white/80 dark:bg-[#1f1f1f]/80 backdrop-blur-sm sticky top-0 z-10">
+      <header className="border-b border-gray-200 px-4 md:px-8 py-3 md:py-4 bg-white/80 backdrop-blur-sm sticky top-0 z-10 mobile-force">
         <div className="max-w-5xl mx-auto flex items-center justify-between">
           <div className="flex items-center gap-3">
-            <div className="relative">
-              <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-[rgb(164,120,100)] to-[rgb(144,100,80)] flex items-center justify-center shadow-lg">
-                <Sparkles className="w-5 h-5 text-white" strokeWidth={2.5} />
-              </div>
-              <div className="absolute -bottom-1 -right-1 w-3 h-3 bg-green-500 rounded-full border-2 border-white dark:border-[#1f1f1f]"></div>
+            <div className="w-16 h-16 md:w-20 md:h-20 flex items-center justify-center mobile-logo">
+              <Image 
+                src="/rak-logo.svg" 
+                alt="RAK Porcelain" 
+                width={80} 
+                height={80}
+                className="w-16 h-16 md:w-20 md:h-20"
+              />
             </div>
             <div>
-              <h1 className="text-lg font-semibold text-gray-900 dark:text-gray-100">
-                RAK Porcelain Assistant
+              <h1 className="text-base md:text-lg font-semibold text-gray-900">
+                Signature Connoisseur
               </h1>
-              <p className="text-xs text-gray-500 dark:text-gray-400">
-                Always here to help
+              <p className="text-[10px] md:text-xs text-gray-500">
+                Your exclusive expert assistance
               </p>
             </div>
           </div>
@@ -174,36 +404,45 @@ export function ChatInterface() {
       </header>
 
       {/* Messages Area */}
-      <div className="flex-1 overflow-y-auto">
-        <div className="max-w-5xl mx-auto px-6 md:px-8 py-8">
+      <div className="flex-1 overflow-y-auto overflow-x-hidden">
+        <div className="max-w-5xl mx-auto px-4 md:px-8 py-6 md:py-8 pt-8 md:pt-12">
           {/* Welcome Screen */}
           {showWelcome && messages.length === 0 && (
-            <div className="space-y-8 animate-in fade-in duration-700">
-              <div className="text-center space-y-4 py-12">
-                <div className="inline-flex items-center justify-center w-20 h-20 rounded-3xl bg-gradient-to-br from-[rgb(164,120,100)] to-[rgb(144,100,80)] shadow-2xl mb-4">
-                  <Sparkles className="w-10 h-10 text-white" strokeWidth={2} />
+            <div className="flex flex-col justify-center items-center h-full space-y-8 animate-in fade-in duration-700">
+              <div className="text-center space-y-6">
+                {/* Brand Video - 1.6x size (128px * 1.6 = 204.8px ~ 52 in tailwind) */}
+                <div className="inline-flex items-center justify-center">
+                  <div className="relative w-32 h-32 md:w-52 md:h-52 rounded-full overflow-hidden mobile-video">
+                    <video
+                      autoPlay
+                      loop
+                      muted
+                      playsInline
+                      className="w-full h-full object-cover"
+                    >
+                      <source src="/rak-brand-video-compressed.mp4" type="video/mp4" />
+                      {/* Fallback to logo if video doesn't load */}
+                      <div className="w-full h-full bg-white flex items-center justify-center">
+                        <Image 
+                          src="/rak-logo.svg" 
+                          alt="RAK Porcelain" 
+                          width={160} 
+                          height={160}
+                          className="w-24 h-24 md:w-40 md:h-40"
+                        />
+                      </div>
+                    </video>
+                  </div>
                 </div>
-                <h2 className="text-4xl md:text-5xl font-bold text-gray-900 dark:text-gray-100 tracking-tight">
-                  Hi! I'm here to help you explore RAK Porcelain
-                </h2>
-                <p className="text-xl text-gray-600 dark:text-gray-400 max-w-2xl mx-auto leading-relaxed">
-                  Looking for the perfect porcelain pieces? I'd love to show you our collections, answer questions, or help you find exactly what you need.
-                </p>
-              </div>
-
-              {/* Suggested Questions */}
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-3 max-w-3xl mx-auto">
-                {suggestedQuestions.map((question, index) => (
-                  <button
-                    key={index}
-                    onClick={() => setInput(question)}
-                    className="group p-4 text-left rounded-2xl border border-gray-200 dark:border-gray-700 hover:border-[rgb(164,120,100)] dark:hover:border-[rgb(184,140,120)] hover:bg-[rgba(164,120,100,0.05)] dark:hover:bg-[rgba(184,140,120,0.1)] transition-all duration-200 hover:shadow-md"
-                  >
-                    <p className="text-sm text-gray-700 dark:text-gray-300 group-hover:text-[rgb(144,100,80)] dark:group-hover:text-[rgb(184,140,120)] leading-relaxed">
-                      {question}
-                    </p>
-                  </button>
-                ))}
+                
+                <div>
+                  <h2 className="text-4xl md:text-5xl font-bold text-gray-900 tracking-tight mb-3">
+                    Hi! I'm here to help you explore RAK Porcelain
+                  </h2>
+                  <p className="text-xl text-gray-600 max-w-2xl mx-auto leading-relaxed">
+                    Looking for the perfect porcelain pieces? I'd love to show you our collections, answer questions, or help you find exactly what you need.
+                  </p>
+                </div>
               </div>
             </div>
           )}
@@ -220,72 +459,77 @@ export function ChatInterface() {
               >
                 {message.role === 'assistant' && (
                   <div className="flex-shrink-0">
-                    <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-[rgb(164,120,100)] to-[rgb(144,100,80)] flex items-center justify-center shadow-lg">
-                      <Sparkles className="w-5 h-5 text-white" strokeWidth={2.5} />
+                    <div className="w-10 h-10 rounded-xl bg-white flex items-center justify-center shadow-lg border border-gray-200">
+                      <Image 
+                        src="/rak-logo.svg" 
+                        alt="RAK Porcelain" 
+                        width={32} 
+                        height={32}
+                        className="w-8 h-8"
+                      />
                     </div>
                   </div>
                 )}
 
                 <div className={cn(
-                  "flex-1 max-w-[85%] md:max-w-[75%] space-y-3",
+                  "flex-1 max-w-[90%] md:max-w-[75%] space-y-3",
                   message.role === 'user' && 'flex justify-end'
                 )}>
                   {message.role === 'user' ? (
-                    <div className="inline-block px-6 py-4 rounded-full bg-[rgb(164,120,100)] text-white shadow-lg">
-                      <p className="text-[15px] leading-relaxed whitespace-pre-wrap break-words">
+                    <div className="inline-block px-4 md:px-6 py-3 md:py-4 rounded-full bg-[rgb(164,120,100)] text-white shadow-lg">
+                      <p className="text-sm md:text-[15px] leading-relaxed whitespace-pre-wrap break-words">
                         {message.content}
                       </p>
                     </div>
                   ) : (
                     <div className="space-y-3">
-                      {message.isStreaming ? (
+                      {message.content?.length === 0 ? (
                         <div className="flex items-center gap-2">
                           <div className="flex gap-1">
-                            <span className="w-2 h-2 bg-[rgb(164,120,100)] dark:bg-[rgb(184,140,120)] rounded-full animate-bounce" style={{ animationDelay: '0ms' }}></span>
-                            <span className="w-2 h-2 bg-[rgb(164,120,100)] dark:bg-[rgb(184,140,120)] rounded-full animate-bounce" style={{ animationDelay: '150ms' }}></span>
-                            <span className="w-2 h-2 bg-[rgb(164,120,100)] dark:bg-[rgb(184,140,120)] rounded-full animate-bounce" style={{ animationDelay: '300ms' }}></span>
+                            <span className="w-2 h-2 bg-[rgb(164,120,100)] rounded-full animate-bounce" style={{ animationDelay: '0ms' }}></span>
+                            <span className="w-2 h-2 bg-[rgb(164,120,100)] rounded-full animate-bounce" style={{ animationDelay: '150ms' }}></span>
+                            <span className="w-2 h-2 bg-[rgb(164,120,100)] rounded-full animate-bounce" style={{ animationDelay: '300ms' }}></span>
                           </div>
                         </div>
                       ) : (
                         <>
                           <div className="space-y-4">
-                            {message.isStreaming ? (
-                              <div className="text-[15px] leading-relaxed text-gray-800 dark:text-gray-200">
-                                <StreamingText
-                                  text={message.content}
-                                  speed={20}
-                                  isStreaming={message.isStreaming}
-                                  className="text-[15px] leading-relaxed"
-                                />
-                              </div>
-                            ) : (
-                              message.content.split('\n\n').map((paragraph, idx) => (
-                                <p 
-                                  key={idx}
-                                  className="text-[15px] leading-relaxed text-gray-800 dark:text-gray-200 m-0"
-                                >
-                                  {paragraph}
-                                </p>
-                              ))
-                            )}
+                            <div className="text-sm md:text-[15px] leading-relaxed text-gray-800">
+                              <StreamingText
+                                text={message.content}
+                                speed={20}
+                                isStreaming={!!message.isStreaming}
+                                className="text-[15px] leading-relaxed"
+                                onComplete={() => {
+                                  setMessages(prev => {
+                                    const next = [...prev];
+                                    const m = next[index];
+                                    if (m && m.role === 'assistant') {
+                                      next[index] = { ...m, isStreaming: false };
+                                    }
+                                    return next;
+                                  });
+                                }}
+                              />
+                            </div>
                           </div>
 
                           {/* Product Thumbnails - Show even while typing */}
                           {message.products && message.products.length > 0 && (
                             <div className="pt-4 mt-4 space-y-3 animate-in fade-in duration-500">
-                              <p className="text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wide">
+                              <p className="text-xs font-medium text-gray-500 uppercase tracking-wide">
                                 Featured Products ({message.products.length})
                               </p>
-                              <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-3">
+                              <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-2 md:gap-3">
                                 {message.products.map((product, idx) => (
                                   <a
                                     key={idx}
                                     href={product.productUrl}
                                     target="_blank"
                                     rel="noopener noreferrer"
-                                    className="group block rounded-2xl border border-gray-200 dark:border-gray-700 overflow-hidden hover:border-[rgb(164,120,100)] dark:hover:border-[rgb(184,140,120)] hover:shadow-lg transition-all duration-200"
+                                    className="group block rounded-2xl border border-gray-200 overflow-hidden hover:border-[rgb(164,120,100)] hover:shadow-lg transition-all duration-200"
                                   >
-                                    <div className="aspect-square bg-gray-100 dark:bg-gray-800 relative overflow-hidden">
+                                    <div className="aspect-square bg-gray-100 relative overflow-hidden rounded-lg">
                                       <img
                                         src={product.imageUrl}
                                         alt={product.name}
@@ -296,12 +540,12 @@ export function ChatInterface() {
                                         }}
                                       />
                                     </div>
-                                    <div className="p-2">
-                                      <p className="text-xs font-medium text-gray-900 dark:text-gray-100 truncate">
+                                    <div className="p-1.5 md:p-2">
+                                      <p className="text-[10px] md:text-xs font-medium text-gray-900 truncate">
                                         {product.name}
                                       </p>
                                       {product.code && (
-                                        <p className="text-[10px] text-gray-500 dark:text-gray-400 truncate">
+                                        <p className="text-[8px] md:text-[10px] text-gray-500 truncate">
                                           {product.code}
                                         </p>
                                       )}
@@ -312,30 +556,175 @@ export function ChatInterface() {
                             </div>
                           )}
 
-                          {/* Sources */}
-                          {message.sources && message.sources.length > 0 && (
-                            <div className="pt-3 mt-3 border-t border-gray-200 dark:border-gray-700">
-                              <p className="text-xs font-medium text-gray-500 dark:text-gray-400 mb-2 uppercase tracking-wide">
-                                Sources
-                              </p>
+                          {/* Explore Collections & Categories */}
+                          <div className="pt-4 mt-4 space-y-4">
+                            {/* Random Subcategories - Always visible */}
+                            <div>
+                              <div className="flex items-center justify-between mb-2">
+                                <p className="text-xs font-medium text-gray-500 uppercase tracking-wide flex items-center gap-1.5">
+                                  <Tag className="w-3.5 h-3.5" />
+                                  Explore Collections
+                                </p>
+                                <button
+                                  onClick={refreshSubCategories}
+                                  disabled={isLoadingSubCategories}
+                                  className="text-xs text-gray-400 hover:text-gray-600 transition-colors duration-200 disabled:opacity-50"
+                                  title="Refresh collections"
+                                >
+                                  {isLoadingSubCategories ? (
+                                    <Loader2 className="w-3 h-3 animate-spin" />
+                                  ) : (
+                                    '↻'
+                                  )}
+                                </button>
+                              </div>
                               <div className="flex flex-wrap gap-2">
-                                {message.sources.map((source, idx) => (
-                                  <a
-                                    key={idx}
-                                    href={source}
-                                    target="_blank"
-                                    rel="noopener noreferrer"
-                                    className="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs rounded-full bg-[rgba(164,120,100,0.1)] dark:bg-[rgba(184,140,120,0.15)] text-[rgb(144,100,80)] dark:text-[rgb(184,140,120)] hover:bg-[rgba(164,120,100,0.2)] dark:hover:bg-[rgba(184,140,120,0.25)] transition-colors group"
-                                  >
-                                    <ExternalLink className="w-3 h-3 group-hover:scale-110 transition-transform" />
-                                    <span className="max-w-[200px] truncate">
-                                      {new URL(source).pathname.split('/').pop() || 'Source'}
-                                    </span>
-                                  </a>
-                                ))}
+                                {isLoadingSubCategories ? (
+                                  <div className="flex items-center gap-2 text-xs text-gray-400">
+                                    <Loader2 className="w-3 h-3 animate-spin" />
+                                    Loading collections...
+                                  </div>
+                                ) : randomSubCategories.length > 0 ? (
+                                  randomSubCategories.map((subcategory, idx) => (
+                                    <a
+                                      key={subcategory.id}
+                                      href={subcategory.url}
+                                      target="_blank"
+                                      rel="noopener noreferrer"
+                                      className="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs rounded-full bg-[rgba(164,120,100,0.08)] text-[rgb(144,100,80)] hover:bg-[rgba(164,120,100,0.15)] hover:shadow-md transition-all group border border-[rgba(164,120,100,0.2)]"
+                                      title={`${subcategory.category} • ${subcategory.productCount} products`}
+                                    >
+                                      <span className="font-medium truncate max-w-[120px]">{subcategory.name}</span>
+                                      <span className="text-[10px] opacity-50 transition-opacity flex items-center">
+                                        {subcategory.productCount}
+                                      </span>
+                                    </a>
+                                  ))
+                                ) : (
+                                  <div className="text-xs text-gray-400">
+                                    No collections available
+                                  </div>
+                                )}
                               </div>
                             </div>
-                          )}
+
+                            {/* Show Categories Button */}
+                            {!expandedSections[index]?.categories && (
+                              <button
+                                onClick={() => setExpandedSections(prev => ({
+                                  ...prev,
+                                  [index]: { ...prev[index], categories: true }
+                                }))}
+                                className="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium text-[rgb(144,100,80)] bg-[rgba(164,120,100,0.08)] hover:bg-[rgba(164,120,100,0.15)] rounded-full transition-all border border-[rgba(164,120,100,0.2)] hover:shadow-md"
+                              >
+                                <ChevronDown className="w-3.5 h-3.5" />
+                                <span>Explore Dinnerware Categories</span>
+                              </button>
+                            )}
+
+                            {/* Dinnerware Categories - Show on demand */}
+                            {expandedSections[index]?.categories && (
+                              <div className="space-y-4 animate-in fade-in slide-in-from-top-2 duration-300">
+                                <div>
+                                  <div className="flex items-center justify-between mb-2">
+                                    <p className="text-xs font-medium text-gray-500 uppercase tracking-wide flex items-center gap-1.5">
+                                      <Tag className="w-3.5 h-3.5" />
+                                      Dinnerware Categories
+                                    </p>
+                                    <button
+                                      onClick={() => setExpandedSections(prev => ({
+                                        ...prev,
+                                        [index]: { ...prev[index], categories: false, subcategories: false }
+                                      }))}
+                                      className="text-gray-400 hover:text-gray-600 transition-colors"
+                                    >
+                                      <ChevronUp className="w-4 h-4" />
+                                    </button>
+                                  </div>
+                                  <div className="flex flex-wrap gap-2">
+                                    {[
+                                      { name: 'Plates', url: 'https://www.rakporcelain.com/us-en/products?categories=plates' },
+                                      { name: 'Bowls', url: 'https://www.rakporcelain.com/us-en/products?categories=bowls' },
+                                      { name: 'Cups & Saucers', url: 'https://www.rakporcelain.com/us-en/products?categories=cups-and-saucers' },
+                                      { name: 'Serving Dishes', url: 'https://www.rakporcelain.com/us-en/products?categories=serving-dishes' },
+                                      { name: 'Platters', url: 'https://www.rakporcelain.com/us-en/products?categories=platters' },
+                                      { name: 'Trays', url: 'https://www.rakporcelain.com/us-en/products?categories=trays' },
+                                      { name: 'Ramekins', url: 'https://www.rakporcelain.com/us-en/products?categories=ramekins' },
+                                      { name: 'Teapots', url: 'https://www.rakporcelain.com/us-en/products?categories=teapots' },
+                                      { name: 'Coffee Sets', url: 'https://www.rakporcelain.com/us-en/products?categories=coffee-sets' },
+                                      { name: 'Tea Sets', url: 'https://www.rakporcelain.com/us-en/products?categories=tea-sets' },
+                                    ].map((category, idx) => (
+                                      <a
+                                        key={idx}
+                                        href={category.url}
+                                        target="_blank"
+                                        rel="noopener noreferrer"
+                                        className="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs rounded-full bg-gradient-to-r from-[rgba(164,120,100,0.06)] to-[rgba(164,120,100,0.1)] text-[rgb(124,90,70)] hover:from-[rgba(164,120,100,0.12)] hover:to-[rgba(164,120,100,0.18)] hover:shadow-md transition-all group border border-[rgba(164,120,100,0.15)]"
+                                      >
+                                        <span className="font-medium">{category.name}</span>
+                                      </a>
+                                    ))}
+                                  </div>
+                                </div>
+
+                                {/* Show Plate Types Button */}
+                                {!expandedSections[index]?.subcategories && (
+                                  <button
+                                    onClick={() => setExpandedSections(prev => ({
+                                      ...prev,
+                                      [index]: { ...prev[index], subcategories: true }
+                                    }))}
+                                    className="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium text-[rgb(124,90,70)] bg-white hover:bg-[rgba(164,120,100,0.06)] rounded-full transition-all border border-gray-200 hover:border-[rgba(164,120,100,0.3)]"
+                                  >
+                                    <ChevronDown className="w-3.5 h-3.5" />
+                                    <span>Show Plate Types</span>
+                                  </button>
+                                )}
+
+                                {/* Plate Types (Subcategories) - Show on demand */}
+                                {expandedSections[index]?.subcategories && (
+                                  <div className="animate-in fade-in slide-in-from-top-2 duration-300">
+                                    <div className="flex items-center justify-between mb-2">
+                                      <p className="text-xs font-medium text-gray-400 uppercase tracking-wide flex items-center gap-1.5">
+                                        <span className="text-[10px]">→</span>
+                                        Plate Types
+                                      </p>
+                                      <button
+                                        onClick={() => setExpandedSections(prev => ({
+                                          ...prev,
+                                          [index]: { ...prev[index], subcategories: false }
+                                        }))}
+                                        className="text-gray-400 hover:text-gray-600 transition-colors"
+                                      >
+                                        <ChevronUp className="w-4 h-4" />
+                                      </button>
+                                    </div>
+                                    <div className="flex flex-wrap gap-1.5">
+                                      {[
+                                        { name: 'Dinner Plates', url: 'https://www.rakporcelain.com/us-en/products?categories=plates&subcategories=dinner-plates' },
+                                        { name: 'Dessert Plates', url: 'https://www.rakporcelain.com/us-en/products?categories=plates&subcategories=dessert-plates' },
+                                        { name: 'Appetizer Plates', url: 'https://www.rakporcelain.com/us-en/products?categories=plates&subcategories=appetizer-plates' },
+                                        { name: 'Charger Plates', url: 'https://www.rakporcelain.com/us-en/products?categories=plates&subcategories=charger-plates' },
+                                        { name: 'Bread Plates', url: 'https://www.rakporcelain.com/us-en/products?categories=plates&subcategories=bread-plates' },
+                                        { name: 'Pasta Plates', url: 'https://www.rakporcelain.com/us-en/products?categories=plates&subcategories=pasta-plates' },
+                                        { name: 'Gourmet Plates', url: 'https://www.rakporcelain.com/us-en/products?categories=plates&subcategories=gourmet' },
+                                      ].map((subcat, idx) => (
+                                        <a
+                                          key={idx}
+                                          href={subcat.url}
+                                          target="_blank"
+                                          rel="noopener noreferrer"
+                                          className="inline-flex items-center px-2.5 py-1 text-[11px] rounded-full bg-white text-gray-600 hover:text-[rgb(124,90,70)] hover:bg-[rgba(164,120,100,0.06)] transition-all border border-gray-200 hover:border-[rgba(164,120,100,0.3)]"
+                                        >
+                                          {subcat.name}
+                                        </a>
+                                      ))}
+                                    </div>
+                                  </div>
+                                )}
+                              </div>
+                            )}
+                          </div>
                         </>
                       )}
                     </div>
@@ -356,7 +745,7 @@ export function ChatInterface() {
           {/* Error Message */}
           {error && (
             <div className="flex justify-center mt-6 animate-in fade-in slide-in-from-bottom-2">
-              <div className="inline-flex items-center gap-3 px-5 py-3 rounded-2xl bg-red-50 dark:bg-red-950/20 border border-red-200 dark:border-red-800 text-red-700 dark:text-red-300">
+              <div className="inline-flex items-center gap-3 px-5 py-3 rounded-2xl bg-red-50 border border-red-200 text-red-700">
                 <AlertCircle className="w-5 h-5 flex-shrink-0" />
                 <p className="text-sm">{error}</p>
               </div>
@@ -368,24 +757,113 @@ export function ChatInterface() {
       </div>
 
       {/* Input Area */}
-      <div className="border-t border-gray-200 dark:border-gray-800 bg-white/80 dark:bg-[#1f1f1f]/80 backdrop-blur-sm">
-        <div className="max-w-5xl mx-auto px-6 md:px-8 py-6">
+      <div className="bg-white/80 backdrop-blur-sm sticky bottom-0 md:relative">
+        <div className="max-w-5xl mx-auto px-4 md:px-8 py-4 md:py-6 mobile-force">
+          {/* Suggested Questions - Show when welcome is visible */}
+          {showWelcome && messages.length === 0 && (
+            <div className="mb-6">
+              <p className="text-xs font-medium text-gray-500 mb-3 uppercase tracking-wide">
+                Quick Start
+              </p>
+              <div className="flex flex-wrap gap-2">
+                <div className="block md:hidden">
+                  {mobileSuggestedQuestions.map((question, index) => (
+                    <button
+                      key={index}
+                      onClick={() => {
+                        setInput(question);
+                        inputRef.current?.focus();
+                      }}
+                      className="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs rounded-full bg-[rgba(164,120,100,0.08)] text-[rgb(144,100,80)] hover:bg-[rgba(164,120,100,0.15)] hover:shadow-md transition-all border border-[rgba(164,120,100,0.2)] mr-2 mb-2"
+                    >
+                      <span className="font-medium">{question}</span>
+                    </button>
+                  ))}
+                </div>
+                <div className="hidden md:flex flex-wrap gap-2">
+                  {suggestedQuestions.map((question, index) => (
+                    <button
+                      key={index}
+                      onClick={() => {
+                        setInput(question);
+                        inputRef.current?.focus();
+                      }}
+                      className="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs rounded-full bg-[rgba(164,120,100,0.08)] text-[rgb(144,100,80)] hover:bg-[rgba(164,120,100,0.15)] hover:shadow-md transition-all border border-[rgba(164,120,100,0.2)]"
+                    >
+                      <span className="font-medium">{question}</span>
+                    </button>
+                  ))}
+                </div>
+              </div>
+            </div>
+          )}
+
+          {/* Image Preview */}
+          {uploadedImage && (
+            <div className="mb-4 p-3 bg-gray-50 rounded-2xl border border-gray-200">
+              <div className="flex items-center gap-3">
+                <div className="relative">
+                  <img 
+                    src={uploadedImage} 
+                    alt="Uploaded" 
+                    className="w-16 h-16 object-cover rounded-lg"
+                  />
+                  <button
+                    onClick={() => {
+                      setUploadedImage(null);
+                      if (fileInputRef.current) {
+                        fileInputRef.current.value = '';
+                      }
+                    }}
+                    className="absolute -top-2 -right-2 p-1 bg-red-500 hover:bg-red-600 text-white rounded-full transition-colors"
+                  >
+                    <X className="w-3 h-3" />
+                  </button>
+                </div>
+                <div className="flex-1">
+                  <p className="text-sm font-medium text-gray-900">Image ready to analyze</p>
+                  <p className="text-xs text-gray-500">Click send to find similar products</p>
+                </div>
+              </div>
+            </div>
+          )}
+
           <form onSubmit={handleSubmit} className="relative">
-            <div className="relative flex items-end gap-3 p-2 rounded-full border border-gray-200 dark:border-gray-700 focus-within:border-[rgb(164,120,100)] dark:focus-within:border-[rgb(184,140,120)] bg-white dark:bg-[#2a2a2a] transition-all shadow-lg shadow-gray-200/50 dark:shadow-black/50">
+            <div className="relative flex items-center gap-2 md:gap-3 p-2 md:p-3 rounded-full border border-gray-200 focus-within:border-[rgb(164,120,100)] bg-white transition-all shadow-lg shadow-gray-200/50">
+              {/* Image Upload Button */}
+              <input
+                ref={fileInputRef}
+                type="file"
+                accept="image/*"
+                onChange={handleImageUpload}
+                className="hidden"
+              />
+              <button
+                type="button"
+                onClick={() => fileInputRef.current?.click()}
+                disabled={isLoading || isAnalyzingImage}
+                className="flex-shrink-0 p-2 md:p-2.5 text-gray-600 hover:text-[rgb(164,120,100)] hover:bg-[rgba(164,120,100,0.1)] rounded-full transition-all"
+                title="Upload image to find similar products"
+              >
+                <ImageIcon className="w-4 h-4 md:w-5 md:h-5" />
+              </button>
+
               <textarea
                 ref={inputRef}
                 value={input}
                 onChange={(e) => setInput(e.target.value)}
                 onKeyDown={handleKeyDown}
-                placeholder="Ask me anything about RAK Porcelain..."
-                className="flex-1 resize-none bg-transparent px-6 py-3 text-[15px] text-gray-900 dark:text-gray-100 placeholder:text-gray-400 dark:placeholder:text-gray-500 focus:outline-none border-0 leading-relaxed"
+                placeholder={uploadedImage ? "Describe what you're looking for (optional)..." : (isClient && isMobile ? "Ask me anything..." : "Ask me anything about RAK Porcelain...")}
+                className="flex-1 resize-none bg-transparent px-4 md:px-6 py-2 text-sm md:text-[15px] text-gray-900 placeholder:text-gray-400 focus:outline-none border-0 leading-relaxed scrollbar-hide"
                 rows={1}
-                disabled={isLoading}
+                disabled={isLoading || isAnalyzingImage}
                 style={{
                   minHeight: '24px',
                   maxHeight: '200px',
                   outline: 'none',
                   boxShadow: 'none',
+                  scrollbarWidth: 'none',
+                  msOverflowStyle: 'none',
                 }}
                 onInput={(e) => {
                   const target = e.target as HTMLTextAreaElement;
@@ -395,25 +873,33 @@ export function ChatInterface() {
               />
               <button
                 type="submit"
-                disabled={isLoading || !input.trim()}
+                disabled={(isLoading || isAnalyzingImage) || (!input.trim() && !uploadedImage)}
                 className={cn(
-                  "flex-shrink-0 p-3 rounded-full transition-all duration-200",
-                  isLoading || !input.trim()
-                    ? "bg-gray-200 dark:bg-gray-700 text-gray-400 dark:text-gray-500 cursor-not-allowed"
+                  "flex-shrink-0 px-4 md:px-5 py-2 md:py-2.5 rounded-full transition-all duration-200 inline-flex items-center gap-1 md:gap-2",
+                  (isLoading || isAnalyzingImage) || (!input.trim() && !uploadedImage)
+                    ? "bg-gray-200 text-gray-400 cursor-not-allowed"
                     : "bg-[rgb(164,120,100)] hover:bg-[rgb(144,100,80)] text-white shadow-lg shadow-[rgba(164,120,100,0.3)] hover:shadow-xl hover:shadow-[rgba(164,120,100,0.4)] hover:scale-105"
                 )}
               >
-                {isLoading ? (
-                  <Loader2 className="w-5 h-5 animate-spin" />
+                {(isLoading || isAnalyzingImage) ? (
+                  <>
+                    <Loader2 className="w-5 h-5 animate-spin" />
+                    <span className="text-xs md:text-sm font-medium">Analyzing...</span>
+                  </>
                 ) : (
-                  <Send className="w-5 h-5" />
+                  <>
+                    <Send className="w-5 h-5" />
+                    <span className="text-xs md:text-sm font-medium">Send</span>
+                  </>
                 )}
               </button>
             </div>
           </form>
 
-          <p className="text-xs text-center text-gray-500 dark:text-gray-500 mt-4 leading-relaxed">
-            RAK Porcelain AI Assistant can make mistakes. Check important info.
+          <p className="hidden md:block text-xs text-center text-gray-500 mt-4 leading-relaxed">
+            {uploadedImage 
+              ? "Add a description to refine your search, or just click Send to find similar products" 
+              : "Tip: You can paste images directly (Ctrl/Cmd + V) or click the 📷 icon to upload"}
           </p>
         </div>
       </div>

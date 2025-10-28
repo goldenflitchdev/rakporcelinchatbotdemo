@@ -658,6 +658,18 @@ ls -la data/vector-store.json
 
 ## 📜 Changelog
 
+### **[v1.2.6] - 2025-10-28** 🎯
+**Dynamic Random Subcategories Integration**
+- ✅ **Dynamic Random Subcategories**: Explore Collections now shows 3-7 random subcategories from the database
+- ✅ **Real-time Refresh**: Manual refresh button to get new random collections  
+- ✅ **Product Count Display**: Hover to see product count for each subcategory
+- ✅ **Direct Navigation**: Click subcategories to go directly to RAK Porcelain product pages
+- ✅ **Database Integration**: New API endpoint `/api/subcategories` fetches live data
+- ✅ **Multi-language Support**: Supports English, French, German, Spanish, Italian
+- ✅ **Loading States**: Visual feedback during data fetching
+- ✅ **Error Handling**: Graceful fallbacks when database is unavailable
+- ✅ **Comprehensive Database Extract**: Complete subcategory database with 1,207 subcategories across 99 categories
+
 ### **[v1.2.5] - 2025-10-28** ⚡🔥
 
 #### ⚡ **CRITICAL FIXES: Products Always Show + 2x Faster!**
