@@ -23,6 +23,12 @@ export async function searchProducts(
   limit: number = 5
 ): Promise<ProductResult[]> {
   try {
+    // Check if database is configured
+    if (!process.env.DB_HOST) {
+      console.log('Database not configured, skipping product search');
+      return [];
+    }
+
     // Search products by name, code, or description
     // Prioritize products with images
     const products = await query<{
@@ -77,6 +83,11 @@ export async function getProductsByCategory(
   limit: number = 5
 ): Promise<ProductResult[]> {
   try {
+    // Check if database is configured
+    if (!process.env.DB_HOST) {
+      return [];
+    }
+
     // Get category ID
     const categories = await query<{ id: number; locale: string }>(
       `SELECT id, locale FROM categories 
@@ -140,6 +151,11 @@ export async function getProductsByCollection(
   limit: number = 5
 ): Promise<ProductResult[]> {
   try {
+    // Check if database is configured
+    if (!process.env.DB_HOST) {
+      return [];
+    }
+
     // Get collection ID
     const collections = await query<{ id: number; locale: string }>(
       `SELECT id, locale FROM collections 
@@ -254,10 +270,34 @@ export async function detectProductIntent(message: string): Promise<{
 }> {
   const lowerMessage = message.toLowerCase();
 
-  // Detect if user is asking about products
+  // Expanded product keywords for better detection
   const productKeywords = [
-    'product', 'plate', 'bowl', 'cup', 'dish', 'show me', 'what do you have',
-    'collection', 'category', 'porcelain', 'dinnerware', 'serveware'
+    // Direct product mentions
+    'product', 'plate', 'bowl', 'cup', 'dish', 'saucer', 'platter', 'mug',
+    'teapot', 'coffee', 'dinnerware', 'serveware', 'tableware', 'porcelain',
+    
+    // Action words
+    'show', 'see', 'looking for', 'need', 'want', 'buy', 'purchase',
+    'browse', 'explore', 'find', 'search', 'recommend', 'suggest',
+    
+    // Questions
+    'what do you have', 'what products', 'what items', 'what options',
+    'do you sell', 'do you offer', 'available', 'stock',
+    
+    // Collections & categories
+    'collection', 'category', 'range', 'line', 'series',
+    'classic gourmet', 'banquet', 'ease', 'neo fusion', 'vintage',
+    
+    // Specific items
+    'dinner plate', 'salad plate', 'soup bowl', 'coffee cup', 'tea cup',
+    'serving dish', 'oval platter', 'round plate', 'square plate',
+    
+    // Materials & features
+    'white porcelain', 'colored', 'microwave safe', 'dishwasher safe',
+    'commercial', 'hotel', 'restaurant',
+    
+    // General discovery
+    'catalog', 'catalogue', 'menu', 'selection', 'variety'
   ];
 
   const hasProductIntent = productKeywords.some(keyword => 
@@ -268,25 +308,57 @@ export async function detectProductIntent(message: string): Promise<{
     return { hasProductIntent: false };
   }
 
-  // Try to extract collection name
+  // Comprehensive collection names
   const collections = [
     'classic gourmet', 'banquet', 'ease', 'neo fusion', 'vintage',
-    'ivoris', 'rondo', 'shale', 'trinidad'
+    'ivoris', 'rondo', 'shale', 'trinidad', 'metalfusion', 'sketch',
+    'woodart', 'suggestions', 'titan', 'karbon', 'genesis', 'chef\'s cult',
+    'fire', 'stone', 'charm', 'chroma'
   ];
   
   const foundCollection = collections.find(col => lowerMessage.includes(col));
 
-  // Try to extract category
+  // Comprehensive categories
   const categories = [
-    'plate', 'bowl', 'cup', 'saucer', 'platter', 'dish', 'mug',
-    'teapot', 'coffee pot', 'creamer', 'sugar bowl'
+    // Plates
+    'plate', 'platter', 'charger',
+    
+    // Bowls
+    'bowl', 'soup bowl', 'salad bowl', 'pasta bowl', 'rice bowl',
+    
+    // Cups & Mugs
+    'cup', 'mug', 'coffee cup', 'tea cup', 'espresso cup', 'cappuccino cup',
+    
+    // Saucers
+    'saucer',
+    
+    // Serving
+    'serving dish', 'serving bowl', 'serving platter', 'tray',
+    
+    // Pots & Containers
+    'teapot', 'coffee pot', 'creamer', 'sugar bowl', 'milk jug',
+    
+    // Specialty
+    'ramekin', 'egg cup', 'butter dish', 'salt', 'pepper'
   ];
   
   const foundCategory = categories.find(cat => lowerMessage.includes(cat));
 
-  // Extract search term (simplified)
-  const words = message.split(' ').filter(w => w.length > 3);
-  const searchTerm = foundCategory || foundCollection || words.slice(-2).join(' ');
+  // Smart search term extraction
+  let searchTerm = '';
+  
+  if (foundCollection) {
+    searchTerm = foundCollection;
+  } else if (foundCategory) {
+    searchTerm = foundCategory;
+  } else {
+    // Extract meaningful words for general search
+    const words = lowerMessage
+      .replace(/[^\w\s]/g, ' ')
+      .split(' ')
+      .filter(w => w.length > 3 && !['what', 'show', 'tell', 'about', 'have', 'your'].includes(w));
+    searchTerm = words.slice(0, 2).join(' ') || 'plate'; // Default to plates
+  }
 
   return {
     hasProductIntent: true,

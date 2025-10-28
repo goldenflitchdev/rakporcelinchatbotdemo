@@ -102,7 +102,23 @@ export async function POST(req: NextRequest) {
       }))
     );
 
-    // Step 4: Call OpenAI for completion
+    // Step 4: Enhance prompt if products are found
+    let finalPrompt = contextPrompt;
+    if (products.length > 0) {
+      finalPrompt = `${contextPrompt}
+
+IMPORTANT: I'm showing the user ${products.length} product thumbnails below your response. 
+Reference these products naturally in your answer. Mention that they can "see the products shown below" 
+or "check out the items displayed" or similar natural phrasing.
+
+Products being shown:
+${products.map(p => `- ${p.name} (${p.code})`).join('\n')}
+
+Remember: Keep your response conversational, break into short paragraphs, and end with an engaging 
+follow-up question!`;
+    }
+
+    // Step 5: Call OpenAI for completion
     const openai = getOpenAIClient();
     
     console.log('Calling OpenAI for completion...');
@@ -111,7 +127,7 @@ export async function POST(req: NextRequest) {
       messages: [
         { role: 'system', content: SYSTEM_PROMPT },
         ...messages.slice(0, -1), // Include conversation history (except last user message)
-        { role: 'user', content: contextPrompt }, // Use context-enriched prompt
+        { role: 'user', content: finalPrompt }, // Use context-enriched prompt
       ],
       temperature: TEMPERATURE,
       max_tokens: 1000,
