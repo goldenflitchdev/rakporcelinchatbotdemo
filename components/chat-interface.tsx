@@ -34,6 +34,7 @@ export function ChatInterface() {
   const [showWelcome, setShowWelcome] = useState(true);
   const [typingText, setTypingText] = useState('');
   const [isTyping, setIsTyping] = useState(false);
+  const dataRef = useRef<{ products?: ProductCard[] } | null>(null);
 
   const scrollToBottom = () => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
@@ -85,6 +86,7 @@ export function ChatInterface() {
       }
 
       const data = await response.json();
+      dataRef.current = data;
       
       // Debug log
       console.log('API Response:', {
@@ -103,26 +105,14 @@ export function ChatInterface() {
           role: 'assistant',
           content: data.message,
           sources: data.sources,
-          products: data.products,
+          // Delay product thumbnails until streaming completes
+          products: [],
           isStreaming: true, // Will trigger StreamingText component
         };
         return newMessages;
       });
 
-      // Mark as complete when done (will be handled by StreamingText onComplete)
-      setTimeout(() => {
-        setIsTyping(false);
-        setMessages(prev => {
-          const newMessages = [...prev];
-          if (newMessages.length > 0) {
-            newMessages[newMessages.length - 1] = {
-              ...newMessages[newMessages.length - 1],
-              isStreaming: false,
-            };
-          }
-          return newMessages;
-        });
-      }, data.message.length * 25); // Estimate time for typing to complete
+      // Completion handled by StreamingText onComplete
     } catch (err) {
       console.error('Chat error:', err);
       setError(err instanceof Error ? err.message : 'An error occurred');
@@ -243,9 +233,26 @@ export function ChatInterface() {
                         <div className="text-[15px] leading-relaxed text-gray-800 dark:text-gray-200">
                           <StreamingText
                             text={message.content}
-                            speed={20}
+                            speed={30}
                             isStreaming={!!message.isStreaming}
                             className="text-[15px] leading-relaxed"
+                            onComplete={() => {
+                              setIsTyping(false);
+                              setMessages(prev => {
+                                const newMessages = [...prev];
+                                if (newMessages.length > 0) {
+                                  newMessages[newMessages.length - 1] = {
+                                    ...newMessages[newMessages.length - 1],
+                                    isStreaming: false,
+                                    // Reveal products after streaming completes
+                                    products: (newMessages[newMessages.length - 1].products && newMessages[newMessages.length - 1].products!.length > 0)
+                                      ? newMessages[newMessages.length - 1].products
+                                      : (dataRef.current?.products || []),
+                                  };
+                                }
+                                return newMessages;
+                              });
+                            }}
                           />
                         </div>
                         {message.isStreaming && (

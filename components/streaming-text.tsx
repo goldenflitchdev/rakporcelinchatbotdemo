@@ -12,16 +12,16 @@ export interface StreamingTextProps {
 
 export function StreamingText({
   text,
-  speed = 20,
+  speed = 30,
   onComplete,
   isStreaming = false,
   className = '',
 }: StreamingTextProps) {
   const [displayedText, setDisplayedText] = useState('');
-  const [showCursor, setShowCursor] = useState(true);
   const indexRef = useRef(0);
   const previousTextRef = useRef('');
   const intervalRef = useRef<NodeJS.Timeout | null>(null);
+  const lastCompletedTextRef = useRef<string>('');
 
   useEffect(() => {
     // If text changed (new chunk arrived in streaming mode)
@@ -49,8 +49,6 @@ export function StreamingText({
 
     // Start typing animation
     if (indexRef.current < text.length) {
-      setShowCursor(true);
-
       intervalRef.current = setInterval(() => {
         if (indexRef.current < text.length) {
           indexRef.current++;
@@ -60,20 +58,20 @@ export function StreamingText({
           if (intervalRef.current) {
             clearInterval(intervalRef.current);
           }
-          
-          // Keep cursor blinking for a moment, then hide
-          setTimeout(() => {
-            setShowCursor(false);
-            if (onComplete && !isStreaming) {
-              onComplete();
-            }
-          }, 500);
+          // Fire completion callback (even in streaming mode) once per text
+          if (onComplete && lastCompletedTextRef.current !== text) {
+            lastCompletedTextRef.current = text;
+            onComplete();
+          }
         }
       }, speed);
     } else if (!isStreaming) {
       // Text is already fully displayed
       setDisplayedText(text);
-      setShowCursor(false);
+      if (onComplete && lastCompletedTextRef.current !== text) {
+        lastCompletedTextRef.current = text;
+        onComplete();
+      }
     }
 
     return () => {
@@ -86,11 +84,6 @@ export function StreamingText({
   return (
     <span className={`inline-block ${className}`} style={{ whiteSpace: 'pre-wrap' }}>
       {displayedText}
-      {showCursor && (
-        <span className="inline-block w-0.5 h-4 ml-0.5 bg-current animate-pulse align-middle">
-          ▌
-        </span>
-      )}
     </span>
   );
 }
