@@ -93,38 +93,78 @@ export function ChatInterface() {
         productsCount: data.products?.length || 0
       });
 
-      // Typing animation effect
-      setIsTyping(true);
+      // Split response into sentences
       const fullText = data.message;
-      let currentIndex = 0;
+      const sentences = fullText.match(/[^.!?]+[.!?]+/g) || [fullText];
+      
+      console.log(`Streaming ${sentences.length} sentences...`);
 
-      // Type out the message character by character
-      const typingInterval = setInterval(() => {
-        if (currentIndex < fullText.length) {
-          const chunkSize = Math.random() > 0.7 ? 2 : 1; // Sometimes type 2 chars for speed variation
-          currentIndex += chunkSize;
+      // Stream one sentence at a time with "Thinking..." in between
+      let currentSentence = 0;
+      let accumulatedText = '';
+
+      const streamNextSentence = async () => {
+        if (currentSentence < sentences.length) {
+          const sentence = sentences[currentSentence].trim();
           
-          setMessages(prev => {
-            const newMessages = [...prev];
-            newMessages[newMessages.length - 1] = {
-              role: 'assistant',
-              content: fullText.substring(0, currentIndex),
-              sources: data.sources,
-              products: data.products,
-              isStreaming: true,
-            };
-            return newMessages;
-          });
+          // Show "Thinking..." before next sentence (except first one)
+          if (currentSentence > 0) {
+            setMessages(prev => {
+              const newMessages = [...prev];
+              newMessages[newMessages.length - 1] = {
+                role: 'assistant',
+                content: accumulatedText + '\n\n_Thinking..._',
+                sources: data.sources,
+                products: data.products,
+                isStreaming: true,
+              };
+              return newMessages;
+            });
+            
+            // Wait before showing next sentence (thinking pause)
+            await new Promise(resolve => setTimeout(resolve, 800));
+          }
+          
+          // Type out the sentence
+          accumulatedText += (currentSentence > 0 ? '\n\n' : '') + sentence;
+          
+          let charIndex = 0;
+          const sentenceText = sentence;
+          
+          const typeChar = () => {
+            if (charIndex < sentenceText.length) {
+              charIndex++;
+              const currentText = accumulatedText.substring(0, accumulatedText.length - sentenceText.length + charIndex);
+              
+              setMessages(prev => {
+                const newMessages = [...prev];
+                newMessages[newMessages.length - 1] = {
+                  role: 'assistant',
+                  content: currentText,
+                  sources: data.sources,
+                  products: data.products,
+                  isStreaming: true,
+                };
+                return newMessages;
+              });
+              
+              setTimeout(typeChar, 30); // 30ms per character
+            } else {
+              // Sentence complete, move to next
+              currentSentence++;
+              setTimeout(streamNextSentence, 300); // Brief pause between sentences
+            }
+          };
+          
+          typeChar();
         } else {
-          // Typing complete
-          clearInterval(typingInterval);
+          // All sentences complete
           setIsTyping(false);
-          
           setMessages(prev => {
             const newMessages = [...prev];
             newMessages[newMessages.length - 1] = {
               role: 'assistant',
-              content: fullText,
+              content: accumulatedText,
               sources: data.sources,
               products: data.products,
               isStreaming: false,
@@ -132,7 +172,10 @@ export function ChatInterface() {
             return newMessages;
           });
         }
-      }, 30); // 30ms per character = ~33 chars/second (natural typing speed)
+      };
+
+      setIsTyping(true);
+      streamNextSentence();
     } catch (err) {
       console.error('Chat error:', err);
       setError(err instanceof Error ? err.message : 'An error occurred');
