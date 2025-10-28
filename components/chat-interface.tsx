@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useRef, useEffect } from 'react';
-import { Send, Loader2, AlertCircle, ExternalLink, Sparkles, User } from 'lucide-react';
+import { Send, Loader2, AlertCircle, Sparkles, User, Tag } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { StreamingText } from './streaming-text';
 
@@ -311,30 +311,96 @@ export function ChatInterface() {
                             </div>
                           )}
 
-                          {/* Sources */}
-                          {message.sources && message.sources.length > 0 && (
-                            <div className="pt-3 mt-3 border-t border-gray-200">
-                              <p className="text-xs font-medium text-gray-500 mb-2 uppercase tracking-wide">
-                                Sources
+                          {/* Explore Collections & Categories */}
+                          <div className="pt-4 mt-4 space-y-4">
+                            {/* Popular Collections */}
+                            <div>
+                              <p className="text-xs font-medium text-gray-500 mb-2 uppercase tracking-wide flex items-center gap-1.5">
+                                <Tag className="w-3.5 h-3.5" />
+                                Explore Collections
                               </p>
                               <div className="flex flex-wrap gap-2">
-                                {message.sources.map((source, idx) => (
+                                {[
+                                  { name: 'Ease', url: 'https://www.rakporcelain.com/us-en/collections/ease' },
+                                  { name: 'Vintage', url: 'https://www.rakporcelain.com/us-en/collections/vintage' },
+                                  { name: 'Neo Fusion', url: 'https://www.rakporcelain.com/us-en/collections/neofusion' },
+                                  { name: 'Suggestions', url: 'https://www.rakporcelain.com/us-en/collections/suggestions' },
+                                  { name: 'Classic Gourmet', url: 'https://www.rakporcelain.com/us-en/collections/classic-gourmet' },
+                                ].map((collection, idx) => (
                                   <a
                                     key={idx}
-                                    href={source}
+                                    href={collection.url}
                                     target="_blank"
                                     rel="noopener noreferrer"
-                                    className="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs rounded-full bg-[rgba(164,120,100,0.1)] text-[rgb(144,100,80)] hover:bg-[rgba(164,120,100,0.2)] transition-colors group"
+                                    className="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs rounded-full bg-[rgba(164,120,100,0.08)] text-[rgb(144,100,80)] hover:bg-[rgba(164,120,100,0.15)] hover:shadow-md transition-all group border border-[rgba(164,120,100,0.2)]"
                                   >
-                                    <ExternalLink className="w-3 h-3 group-hover:scale-110 transition-transform" />
-                                    <span className="max-w-[200px] truncate">
-                                      {new URL(source).pathname.split('/').pop() || 'Source'}
-                                    </span>
+                                    <span className="font-medium">{collection.name}</span>
                                   </a>
                                 ))}
                               </div>
                             </div>
-                          )}
+
+                            {/* Dinnerware Categories */}
+                            <div>
+                              <p className="text-xs font-medium text-gray-500 mb-2 uppercase tracking-wide flex items-center gap-1.5">
+                                <Tag className="w-3.5 h-3.5" />
+                                Dinnerware Categories
+                              </p>
+                              <div className="flex flex-wrap gap-2">
+                                {[
+                                  { name: 'Plates', url: 'https://www.rakporcelain.com/us-en/products?categories=plates' },
+                                  { name: 'Bowls', url: 'https://www.rakporcelain.com/us-en/products?categories=bowls' },
+                                  { name: 'Cups & Saucers', url: 'https://www.rakporcelain.com/us-en/products?categories=cups-and-saucers' },
+                                  { name: 'Serving Dishes', url: 'https://www.rakporcelain.com/us-en/products?categories=serving-dishes' },
+                                  { name: 'Platters', url: 'https://www.rakporcelain.com/us-en/products?categories=platters' },
+                                  { name: 'Trays', url: 'https://www.rakporcelain.com/us-en/products?categories=trays' },
+                                  { name: 'Ramekins', url: 'https://www.rakporcelain.com/us-en/products?categories=ramekins' },
+                                  { name: 'Teapots', url: 'https://www.rakporcelain.com/us-en/products?categories=teapots' },
+                                  { name: 'Coffee Sets', url: 'https://www.rakporcelain.com/us-en/products?categories=coffee-sets' },
+                                  { name: 'Tea Sets', url: 'https://www.rakporcelain.com/us-en/products?categories=tea-sets' },
+                                ].map((category, idx) => (
+                                  <a
+                                    key={idx}
+                                    href={category.url}
+                                    target="_blank"
+                                    rel="noopener noreferrer"
+                                    className="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs rounded-full bg-gradient-to-r from-[rgba(164,120,100,0.06)] to-[rgba(164,120,100,0.1)] text-[rgb(124,90,70)] hover:from-[rgba(164,120,100,0.12)] hover:to-[rgba(164,120,100,0.18)] hover:shadow-md transition-all group border border-[rgba(164,120,100,0.15)]"
+                                  >
+                                    <span className="font-medium">{category.name}</span>
+                                  </a>
+                                ))}
+                              </div>
+                            </div>
+
+                            {/* Plate Types (Subcategories) */}
+                            <div>
+                              <p className="text-xs font-medium text-gray-400 mb-2 uppercase tracking-wide flex items-center gap-1.5">
+                                <span className="text-[10px]">→</span>
+                                Plate Types
+                              </p>
+                              <div className="flex flex-wrap gap-1.5">
+                                {[
+                                  { name: 'Dinner Plates', url: 'https://www.rakporcelain.com/us-en/products?categories=plates&subcategories=dinner-plates' },
+                                  { name: 'Dessert Plates', url: 'https://www.rakporcelain.com/us-en/products?categories=plates&subcategories=dessert-plates' },
+                                  { name: 'Appetizer Plates', url: 'https://www.rakporcelain.com/us-en/products?categories=plates&subcategories=appetizer-plates' },
+                                  { name: 'Charger Plates', url: 'https://www.rakporcelain.com/us-en/products?categories=plates&subcategories=charger-plates' },
+                                  { name: 'Bread Plates', url: 'https://www.rakporcelain.com/us-en/products?categories=plates&subcategories=bread-plates' },
+                                  { name: 'Pasta Plates', url: 'https://www.rakporcelain.com/us-en/products?categories=plates&subcategories=pasta-plates' },
+                                  { name: 'Gourmet Plates', url: 'https://www.rakporcelain.com/us-en/products?categories=plates&subcategories=gourmet' },
+                                ].map((subcat, idx) => (
+                                  <a
+                                    key={idx}
+                                    href={subcat.url}
+                                    target="_blank"
+                                    rel="noopener noreferrer"
+                                    className="inline-flex items-center px-2.5 py-1 text-[11px] rounded-full bg-white text-gray-600 hover:text-[rgb(124,90,70)] hover:bg-[rgba(164,120,100,0.06)] transition-all border border-gray-200 hover:border-[rgba(164,120,100,0.3)]"
+                                  >
+                                    {subcat.name}
+                                  </a>
+                                ))}
+                              </div>
+                            </div>
+                          </div>
                         </>
                       )}
                     </div>
