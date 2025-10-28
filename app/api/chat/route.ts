@@ -122,13 +122,29 @@ follow-up question!`;
     const openai = getOpenAIClient();
     
     console.log('Calling OpenAI for completion...');
+    
+    // Build conversation history properly
+    const conversationMessages = [];
+    
+    // Add system prompt
+    conversationMessages.push({ role: 'system' as const, content: SYSTEM_PROMPT });
+    
+    // Add all previous messages from the conversation
+    for (let i = 0; i < messages.length - 1; i++) {
+      conversationMessages.push({
+        role: messages[i].role as 'user' | 'assistant',
+        content: messages[i].content
+      });
+    }
+    
+    // Add current user message with context
+    conversationMessages.push({ role: 'user' as const, content: finalPrompt });
+    
+    console.log(`Conversation history: ${conversationMessages.length} messages`);
+    
     const completion = await openai.chat.completions.create({
       model: CHAT_MODEL,
-      messages: [
-        { role: 'system', content: SYSTEM_PROMPT },
-        ...messages.slice(0, -1), // Include conversation history (except last user message)
-        { role: 'user', content: finalPrompt }, // Use context-enriched prompt
-      ],
+      messages: conversationMessages,
       temperature: TEMPERATURE,
       max_tokens: 1000,
     });
