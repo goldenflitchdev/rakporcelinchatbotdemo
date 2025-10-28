@@ -658,6 +658,33 @@ ls -la data/vector-store.json
 
 ## 📜 Changelog
 
+### **[v1.1.2] - 2025-10-28**
+
+#### 💬 **Human-Like Conversational AI**
+- **Completely rewrote AI communication style** - Now feels like texting a friend
+- Responses broken into 2-4 short, digestible paragraphs
+- Each paragraph fades in with staggered animation (100ms delays)
+- **ALWAYS includes engaging follow-up questions** at the end
+- Uses warm, friendly language ("Great question!", "I'd love to help!")
+- Proactive product discovery suggestions
+- Encourages users to explore more
+- Natural, flowing conversation style
+
+#### 🎨 **Enhanced Visual Feedback**
+- New typing indicator: 3 bouncing dots in RAK brown
+- Sequential paragraph animations for natural feel
+- Better spacing between thoughts (space-y-4)
+- More conversational welcome message
+- Updated suggested questions to be more engaging
+
+#### 🎯 **Engagement Improvements**
+- Every response ends with invitation to continue
+- Follow-up questions guide the conversation
+- Makes users feel heard and valued
+- More helpful and interactive experience
+
+---
+
 ### **[v1.1.1] - 2025-10-28**
 
 #### 🖼️ **Product Thumbnail Display**
