@@ -658,6 +658,32 @@ ls -la data/vector-store.json
 
 ## 📜 Changelog
 
+### **[v1.1.1] - 2025-10-28**
+
+#### 🖼️ **Product Thumbnail Display**
+- **Visual product recommendations** - Shows top 5 product images with responses
+- Intelligent product intent detection in user queries
+- Automatically searches database for relevant products
+- Product cards display: image, name, product code
+- Clickable thumbnails link to actual rakporcelain.com product pages
+- Responsive grid: 2 cols (mobile) → 3 (tablet) → 5 (desktop)
+- Hover effects: border color change, image zoom (scale-105)
+- Fallback placeholder for missing images
+- Smart search by category, collection, or keywords
+- Image extraction from JSONB database fields
+
+#### 🧠 **Search Intelligence**
+- Detects product-related questions automatically
+- Searches by category (plates, bowls, cups, etc.)
+- Searches by collection (Classic Gourmet, Banquet, etc.)
+- Keyword-based product search
+- Returns most relevant products with images
+
+#### 🆕 **New File**
+- `lib/product-search.ts` - Product search engine (234 lines)
+
+---
+
 ### **[v1.1.0] - 2025-10-28** 🎉
 
 #### 🗄️ **PostgreSQL Database Integration (MAJOR UPDATE)**
