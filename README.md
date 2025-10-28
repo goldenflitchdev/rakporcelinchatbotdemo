@@ -658,6 +658,48 @@ ls -la data/vector-store.json
 
 ## 📜 Changelog
 
+### **[v1.1.0] - 2025-10-28** 🎉
+
+#### 🗄️ **PostgreSQL Database Integration (MAJOR UPDATE)**
+- **Integrated RAK Porcelain PostgreSQL database** (AWS RDS) with 292 tables
+- Intelligent database crawler for products, categories, collections, blogs
+- **708+ vector chunks** created from live database (vs 18 manual chunks)
+- Indexed **500 products** with full specifications, materials, safety info
+- Indexed **99 categories, 21 collections, 100 blogs**
+- **Nightly auto-updates** at 2:00 AM using node-cron
+- Real-time intelligence from actual RAK inventory
+- Product-specific queries now possible (codes, specs, materials)
+- Added PostgreSQL client with connection pooling
+- SSL/TLS secured database connection
+- Comprehensive logging and error handling
+
+#### 📦 **New Dependencies**
+- `pg` v8.13.1 - PostgreSQL client
+- `@types/pg` v8.11.10 - TypeScript support
+- `node-cron` v3.0.3 - Task scheduler
+
+#### 🆕 **New Scripts**
+- `npm run db:inspect` - Inspect database schema (shows all 292 tables)
+- `npm run db:sync` - Manual database synchronization
+- `npm run db:schedule` - Start nightly auto-updater
+
+#### 🆕 **New Files**
+- `lib/postgres.ts` - PostgreSQL connection manager
+- `scripts/sync-database.ts` - Intelligent database crawler (608 lines)
+- `scripts/inspect-database.ts` - Schema inspection tool
+- `scripts/nightly-updater.ts` - Cron scheduler
+- `DATABASE_INTEGRATION.md` - Complete documentation
+
+#### 🧠 **Intelligence Improvements**
+- Answers from **real RAK database** not static content
+- Knows actual product codes, specifications, materials
+- Understands shapes, capacities, safety features
+- References specific collections and categories
+- Includes latest blog posts and announcements
+- Auto-updates to stay current with database changes
+
+---
+
 ### **[v1.0.3] - 2025-10-28**
 
 #### 🎨 **Brand-Aligned Design**
