@@ -658,6 +658,25 @@ ls -la data/vector-store.json
 
 ## 📜 Changelog
 
+### **[v1.1.5] - 2025-10-28**
+
+#### 🎲 **Intelligent Product Variety & Smart Search**
+- **RANDOM() ordering** - Shows different products every time
+- Hierarchical search: Collection → Category → General (with fallbacks)
+- Expanded search fields: now includes material and shape
+- Prevents repetitive product display
+- Users discover full catalog variety
+- Each query showcases different items
+
+#### 🔍 **Enhanced Search Intelligence**
+- Searches material field (porcelain, ceramic, stoneware)
+- Searches shape field (round, square, oval, rectangular)
+- Smart fallback logic ensures products always found
+- Better product matching algorithms
+- More diverse, engaging discovery experience
+
+---
+
 ### **[v1.1.4] - 2025-10-28**
 
 #### 🔧 **Fixed Conversation Context Retention**
