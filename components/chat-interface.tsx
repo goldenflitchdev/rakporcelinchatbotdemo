@@ -31,6 +31,8 @@ export function ChatInterface() {
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLTextAreaElement>(null);
   const [showWelcome, setShowWelcome] = useState(true);
+  const [typingText, setTypingText] = useState('');
+  const [isTyping, setIsTyping] = useState(false);
 
   const scrollToBottom = () => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
@@ -83,18 +85,46 @@ export function ChatInterface() {
 
       const data = await response.json();
 
-      // Replace loading message with actual response
-      setMessages(prev => {
-        const newMessages = [...prev];
-        newMessages[newMessages.length - 1] = {
-          role: 'assistant',
-          content: data.message,
-          sources: data.sources,
-          products: data.products,
-          isStreaming: false,
-        };
-        return newMessages;
-      });
+      // Typing animation effect
+      setIsTyping(true);
+      const fullText = data.message;
+      let currentIndex = 0;
+
+      // Type out the message character by character
+      const typingInterval = setInterval(() => {
+        if (currentIndex < fullText.length) {
+          const chunkSize = Math.random() > 0.7 ? 2 : 1; // Sometimes type 2 chars for speed variation
+          currentIndex += chunkSize;
+          
+          setMessages(prev => {
+            const newMessages = [...prev];
+            newMessages[newMessages.length - 1] = {
+              role: 'assistant',
+              content: fullText.substring(0, currentIndex),
+              sources: data.sources,
+              products: data.products,
+              isStreaming: true,
+            };
+            return newMessages;
+          });
+        } else {
+          // Typing complete
+          clearInterval(typingInterval);
+          setIsTyping(false);
+          
+          setMessages(prev => {
+            const newMessages = [...prev];
+            newMessages[newMessages.length - 1] = {
+              role: 'assistant',
+              content: fullText,
+              sources: data.sources,
+              products: data.products,
+              isStreaming: false,
+            };
+            return newMessages;
+          });
+        }
+      }, 30); // 30ms per character = ~33 chars/second (natural typing speed)
     } catch (err) {
       console.error('Chat error:', err);
       setError(err instanceof Error ? err.message : 'An error occurred');
@@ -224,17 +254,19 @@ export function ChatInterface() {
                             {message.content.split('\n\n').map((paragraph, idx) => (
                               <p 
                                 key={idx}
-                                className="text-[15px] leading-relaxed text-gray-800 dark:text-gray-200 m-0 animate-in fade-in duration-300"
-                                style={{ animationDelay: `${idx * 100}ms` }}
+                                className="text-[15px] leading-relaxed text-gray-800 dark:text-gray-200 m-0"
                               >
                                 {paragraph}
+                                {message.isStreaming && idx === message.content.split('\n\n').length - 1 && (
+                                  <span className="inline-block w-0.5 h-4 ml-1 bg-[rgb(164,120,100)] dark:bg-[rgb(184,140,120)] animate-pulse"></span>
+                                )}
                               </p>
                             ))}
                           </div>
 
-                          {/* Product Thumbnails */}
+                          {/* Product Thumbnails - Show even while typing */}
                           {message.products && message.products.length > 0 && (
-                            <div className="pt-4 mt-4 space-y-3">
+                            <div className="pt-4 mt-4 space-y-3 animate-in fade-in duration-500">
                               <p className="text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wide">
                                 Featured Products
                               </p>
