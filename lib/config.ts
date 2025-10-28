@@ -47,7 +47,7 @@ export const CHAT_MODEL = 'gpt-4o-mini';
 export const COLLECTION_NAME = 'rakporcelain_us';
 export const CHUNK_SIZE = 1000; // tokens
 export const CHUNK_OVERLAP = 200; // tokens
-export const TOP_K = 8;
-export const TEMPERATURE = 0.2;
+export const TOP_K = 5; // Reduced from 8 for faster processing
+export const TEMPERATURE = 0.3; // Slightly higher for more natural responses
 
 

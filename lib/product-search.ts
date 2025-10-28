@@ -284,7 +284,8 @@ export async function detectProductIntent(message: string): Promise<{
     
     // Questions
     'what do you have', 'what products', 'what items', 'what options',
-    'do you sell', 'do you offer', 'available', 'stock',
+    'do you sell', 'do you offer', 'available', 'stock', 'top', 'best',
+    'popular', 'featured', 'new',
     
     // Collections & categories
     'collection', 'category', 'range', 'line', 'series',
@@ -298,8 +299,8 @@ export async function detectProductIntent(message: string): Promise<{
     'white porcelain', 'colored', 'microwave safe', 'dishwasher safe',
     'commercial', 'hotel', 'restaurant',
     
-    // General discovery
-    'catalog', 'catalogue', 'menu', 'selection', 'variety'
+    // General discovery - ALWAYS SHOW PRODUCTS FOR THESE
+    'catalog', 'catalogue', 'menu', 'selection', 'variety', 'rak', 'what', 'tell'
   ];
 
   const hasProductIntent = productKeywords.some(keyword => 

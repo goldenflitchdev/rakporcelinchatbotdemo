@@ -72,24 +72,23 @@ export async function POST(req: NextRequest) {
       });
     }
 
-    // PARALLEL PROCESSING FOR SPEED - Run everything at once!
-    console.log('⚡ Starting parallel operations...');
+    // OPTIMIZED: Skip AI analysis for speed, use simple detection
+    console.log('⚡ Fast processing...');
     
-    const [queryAnalysis, queryEmbedding, productIntent] = await Promise.all([
-      analyzeQuery(userQuery),                    // AI query analysis
+    const [queryEmbedding, productIntent] = await Promise.all([
       createEmbedding(userQuery),                 // Create embedding
       detectProductIntent(userQuery),             // Detect product intent
     ]);
-
-    console.log(`🧠 Analysis: ${queryAnalysis.userIntent} (${queryAnalysis.searchStrategy})`);
     
-    // Now search for products and context in parallel
+    // Search for products and context in parallel
     let products: ProductResult[] = [];
-    let relevantChunksPromise = queryChunks(queryEmbedding, TOP_K);
+    const relevantChunksPromise = queryChunks(queryEmbedding, TOP_K);
     
-    // Product search (run while context search is happening)
-    if (productIntent.hasProductIntent || queryAnalysis.confidence > 0.6) {
-      const searchTerm = queryAnalysis.suggestedQuery || productIntent.searchTerm || userQuery;
+    // ALWAYS try to find products if ANY product keyword detected
+    if (productIntent.hasProductIntent) {
+      const searchTerm = productIntent.searchTerm || 'plate'; // Default to plates
+      
+      console.log(`🔍 Searching: ${searchTerm}`);
       
       if (productIntent.collection) {
         products = await getProductsByCollection(productIntent.collection, 5);
@@ -99,7 +98,13 @@ export async function POST(req: NextRequest) {
         products = await searchProducts(searchTerm, 5);
       }
       
-      console.log(`✅ ${products.length} products found`);
+      // Fallback: if no products found, show random plates
+      if (products.length === 0) {
+        console.log('🎲 No specific match, showing random products...');
+        products = await searchProducts('plate', 5);
+      }
+      
+      console.log(`✅ ${products.length} products ready`);
     }
 
     // Get context results
@@ -126,20 +131,14 @@ export async function POST(req: NextRequest) {
       }))
     );
 
-    // Step 4: Enhance prompt if products are found
+    // Enhance prompt if products are found
     let finalPrompt = contextPrompt;
     if (products.length > 0) {
       finalPrompt = `${contextPrompt}
 
-IMPORTANT: I'm showing the user ${products.length} product thumbnails below your response. 
-Reference these products naturally in your answer. Mention that they can "see the products shown below" 
-or "check out the items displayed" or similar natural phrasing.
-
-Products being shown:
-${products.map(p => `- ${p.name} (${p.code})`).join('\n')}
-
-Remember: Keep your response conversational, break into short paragraphs, and end with an engaging 
-follow-up question!`;
+IMPORTANT: I'm showing ${products.length} product images below your response.
+Mention: "Check out the products shown below" or "I've displayed some options for you".
+Keep response SHORT (2-3 sentences max) and END with a follow-up question!`;
     }
 
     // Step 5: Call OpenAI for completion
@@ -177,7 +176,7 @@ When user asks follow-up questions like "what about...", "tell me more", "and...
       model: CHAT_MODEL,
       messages: conversationMessages,
       temperature: TEMPERATURE,
-      max_tokens: 1000,
+      max_tokens: 300, // Reduced for faster, shorter responses
     });
 
     const assistantMessage = completion.choices[0]?.message?.content || 
