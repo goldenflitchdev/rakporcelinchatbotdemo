@@ -270,21 +270,21 @@ export function ChatInterface() {
       <header className="border-b border-gray-200 px-6 md:px-8 py-4 bg-white/80 backdrop-blur-sm sticky top-0 z-10">
         <div className="max-w-5xl mx-auto flex items-center justify-between">
           <div className="flex items-center gap-3">
-            <div className="w-16 h-16 flex items-center justify-center">
+            <div className="w-20 h-20 flex items-center justify-center">
               <Image 
                 src="/rak-logo.svg" 
                 alt="RAK Porcelain" 
-                width={64} 
-                height={64}
-                className="w-16 h-16"
+                width={80} 
+                height={80}
+                className="w-20 h-20"
               />
             </div>
             <div>
               <h1 className="text-lg font-semibold text-gray-900">
-                RAK Porcelain Connoisseur
+                Signature Connoisseur
               </h1>
               <p className="text-xs text-gray-500">
-                Always here to help
+                Your exclusive expert assistance
               </p>
             </div>
           </div>
