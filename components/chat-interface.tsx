@@ -269,19 +269,21 @@ export function ChatInterface() {
       <div className="border-t border-gray-200 dark:border-gray-800 bg-white/80 dark:bg-[#1f1f1f]/80 backdrop-blur-sm">
         <div className="max-w-5xl mx-auto px-6 md:px-8 py-6">
           <form onSubmit={handleSubmit} className="relative">
-            <div className="relative flex items-end gap-3 p-2 rounded-full border-2 border-gray-200 dark:border-gray-700 focus-within:border-[rgb(164,120,100)] dark:focus-within:border-[rgb(184,140,120)] bg-white dark:bg-[#2a2a2a] transition-all shadow-lg shadow-gray-200/50 dark:shadow-black/50">
+            <div className="relative flex items-end gap-3 p-2 rounded-full border border-gray-200 dark:border-gray-700 focus-within:border-[rgb(164,120,100)] dark:focus-within:border-[rgb(184,140,120)] bg-white dark:bg-[#2a2a2a] transition-all shadow-lg shadow-gray-200/50 dark:shadow-black/50">
               <textarea
                 ref={inputRef}
                 value={input}
                 onChange={(e) => setInput(e.target.value)}
                 onKeyDown={handleKeyDown}
                 placeholder="Ask me anything about RAK Porcelain..."
-                className="flex-1 resize-none bg-transparent px-6 py-3 text-[15px] text-gray-900 dark:text-gray-100 placeholder:text-gray-400 dark:placeholder:text-gray-500 focus:outline-none leading-relaxed"
+                className="flex-1 resize-none bg-transparent px-6 py-3 text-[15px] text-gray-900 dark:text-gray-100 placeholder:text-gray-400 dark:placeholder:text-gray-500 focus:outline-none border-0 leading-relaxed"
                 rows={1}
                 disabled={isLoading}
                 style={{
                   minHeight: '24px',
                   maxHeight: '200px',
+                  outline: 'none',
+                  boxShadow: 'none',
                 }}
                 onInput={(e) => {
                   const target = e.target as HTMLTextAreaElement;
