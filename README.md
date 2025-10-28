@@ -658,6 +658,27 @@ ls -la data/vector-store.json
 
 ## 📜 Changelog
 
+### **[v1.2.1] - 2025-10-28**
+
+#### ✨ **Typewriter Effect & Always-Show Products**
+- **Natural typing animation** - Text streams character-by-character like a human typing
+- 30ms per character (~33 chars/second - natural speed)
+- Variable speed: sometimes 1 char, sometimes 2 for human-like variation
+- **Blinking cursor** in RAK brown while typing
+- Cursor disappears when typing complete
+- **Product thumbnails show immediately** - Don't wait for text to finish
+- Products and text load together for fluid experience
+- Smooth fade-in animation for product grid
+
+#### 🎭 **Enhanced User Experience**
+- Feels like real-time conversation with human
+- Visual feedback is immediate
+- More engaging and alive
+- Professional chat experience like modern AI assistants
+- Text streams naturally while products display
+
+---
+
 ### **[v1.2.0] - 2025-10-28** 🚀
 
 #### 🧠 **AI-Powered Query Analysis (BREAKTHROUGH FEATURE)**
