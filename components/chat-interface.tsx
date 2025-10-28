@@ -17,6 +17,16 @@ interface ProductCard {
   category?: string;
 }
 
+interface SubCategory {
+  id: number;
+  name: string;
+  description: string;
+  category: string;
+  productCount: number;
+  url: string;
+  categoryUrl: string;
+}
+
 interface Message {
   role: 'user' | 'assistant';
   content: string;
@@ -39,6 +49,8 @@ export function ChatInterface() {
   const [uploadedImage, setUploadedImage] = useState<string | null>(null);
   const [isAnalyzingImage, setIsAnalyzingImage] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const [randomSubCategories, setRandomSubCategories] = useState<SubCategory[]>([]);
+  const [isLoadingSubCategories, setIsLoadingSubCategories] = useState(false);
 
   const scrollToBottom = () => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
@@ -51,6 +63,46 @@ export function ChatInterface() {
   useEffect(() => {
     inputRef.current?.focus();
   }, []);
+
+  // Fetch random subcategories on component mount
+  useEffect(() => {
+    const fetchRandomSubCategories = async () => {
+      setIsLoadingSubCategories(true);
+      try {
+        const count = Math.floor(Math.random() * 5) + 3; // Random between 3-7
+        const response = await fetch(`/api/subcategories?count=${count}&locale=en`);
+        const data = await response.json();
+        
+        if (data.subcategories) {
+          setRandomSubCategories(data.subcategories);
+        }
+      } catch (error) {
+        console.error('Error fetching subcategories:', error);
+      } finally {
+        setIsLoadingSubCategories(false);
+      }
+    };
+
+    fetchRandomSubCategories();
+  }, []);
+
+  // Function to refresh subcategories
+  const refreshSubCategories = async () => {
+    setIsLoadingSubCategories(true);
+    try {
+      const count = Math.floor(Math.random() * 5) + 3; // Random between 3-7
+      const response = await fetch(`/api/subcategories?count=${count}&locale=en`);
+      const data = await response.json();
+      
+      if (data.subcategories) {
+        setRandomSubCategories(data.subcategories);
+      }
+    } catch (error) {
+      console.error('Error fetching subcategories:', error);
+    } finally {
+      setIsLoadingSubCategories(false);
+    }
+  };
 
   // Handle paste event for images
   useEffect(() => {
@@ -488,48 +540,53 @@ export function ChatInterface() {
 
                           {/* Explore Collections & Categories */}
                           <div className="pt-4 mt-4 space-y-4">
-                            {/* Popular Collections - Always visible */}
+                            {/* Random Subcategories - Always visible */}
                             <div>
-                              <p className="text-xs font-medium text-gray-500 mb-2 uppercase tracking-wide flex items-center gap-1.5">
-                                <Tag className="w-3.5 h-3.5" />
-                                Explore Collections
-                              </p>
+                              <div className="flex items-center justify-between mb-2">
+                                <p className="text-xs font-medium text-gray-500 uppercase tracking-wide flex items-center gap-1.5">
+                                  <Tag className="w-3.5 h-3.5" />
+                                  Explore Collections
+                                </p>
+                                <button
+                                  onClick={refreshSubCategories}
+                                  disabled={isLoadingSubCategories}
+                                  className="text-xs text-gray-400 hover:text-gray-600 transition-colors duration-200 disabled:opacity-50"
+                                  title="Refresh collections"
+                                >
+                                  {isLoadingSubCategories ? (
+                                    <Loader2 className="w-3 h-3 animate-spin" />
+                                  ) : (
+                                    '↻'
+                                  )}
+                                </button>
+                              </div>
                               <div className="flex flex-wrap gap-2">
-                                {[
-                                  { name: 'Ease', url: 'https://www.rakporcelain.com/us-en/collections/ease' },
-                                  { name: 'Vintage', url: 'https://www.rakporcelain.com/us-en/collections/vintage' },
-                                  { name: 'Neo Fusion', url: 'https://www.rakporcelain.com/us-en/collections/neofusion' },
-                                  { name: 'Suggestions', url: 'https://www.rakporcelain.com/us-en/collections/suggestions' },
-                                  { name: 'Classic Gourmet', url: 'https://www.rakporcelain.com/us-en/collections/classic-gourmet' },
-                                  { name: 'Shale', url: 'https://www.rakporcelain.com/us-en/collections/shale' },
-                                  { name: 'Metalfusion', url: 'https://www.rakporcelain.com/us-en/collections/metalfusion' },
-                                  { name: 'Fire', url: 'https://www.rakporcelain.com/us-en/collections/fire' },
-                                  { name: 'Woodart', url: 'https://www.rakporcelain.com/us-en/collections/woodart' },
-                                  { name: 'Fusion', url: 'https://www.rakporcelain.com/us-en/collections/fusion' },
-                                  { name: 'Exodus', url: 'https://www.rakporcelain.com/us-en/collections/exodus' },
-                                  { name: 'Purity', url: 'https://www.rakporcelain.com/us-en/collections/purity' },
-                                  { name: 'Clarity', url: 'https://www.rakporcelain.com/us-en/collections/clarity' },
-                                  { name: 'Access', url: 'https://www.rakporcelain.com/us-en/collections/access' },
-                                  { name: 'Mazza', url: 'https://www.rakporcelain.com/us-en/collections/mazza' },
-                                  { name: 'Banquet', url: 'https://www.rakporcelain.com/us-en/collections/banquet' },
-                                  { name: 'Rondo', url: 'https://www.rakporcelain.com/us-en/collections/rondo' },
-                                  { name: 'Ska', url: 'https://www.rakporcelain.com/us-en/collections/ska' },
-                                  { name: 'Opera', url: 'https://www.rakporcelain.com/us-en/collections/opera' },
-                                  { name: 'Mosaiques de Baalbek', url: 'https://www.rakporcelain.com/us-en/collections/mosaiques-de-baalbek' },
-                                  { name: 'Novecento', url: 'https://www.rakporcelain.com/us-en/collections/novecento' },
-                                  { name: 'White Garden', url: 'https://www.rakporcelain.com/us-en/collections/white-garden' },
-                                  { name: 'Burgundy', url: 'https://www.rakporcelain.com/us-en/collections/burgundy' },
-                                ].map((collection, idx) => (
-                                  <a
-                                    key={idx}
-                                    href={collection.url}
-                                    target="_blank"
-                                    rel="noopener noreferrer"
-                                    className="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs rounded-full bg-[rgba(164,120,100,0.08)] text-[rgb(144,100,80)] hover:bg-[rgba(164,120,100,0.15)] hover:shadow-md transition-all group border border-[rgba(164,120,100,0.2)]"
-                                  >
-                                    <span className="font-medium">{collection.name}</span>
-                                  </a>
-                                ))}
+                                {isLoadingSubCategories ? (
+                                  <div className="flex items-center gap-2 text-xs text-gray-400">
+                                    <Loader2 className="w-3 h-3 animate-spin" />
+                                    Loading collections...
+                                  </div>
+                                ) : randomSubCategories.length > 0 ? (
+                                  randomSubCategories.map((subcategory, idx) => (
+                                    <a
+                                      key={subcategory.id}
+                                      href={subcategory.url}
+                                      target="_blank"
+                                      rel="noopener noreferrer"
+                                      className="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs rounded-full bg-[rgba(164,120,100,0.08)] text-[rgb(144,100,80)] hover:bg-[rgba(164,120,100,0.15)] hover:shadow-md transition-all group border border-[rgba(164,120,100,0.2)]"
+                                      title={`${subcategory.category} • ${subcategory.productCount} products`}
+                                    >
+                                      <span className="font-medium truncate max-w-[120px]">{subcategory.name}</span>
+                                      <span className="text-[10px] opacity-0 group-hover:opacity-100 transition-opacity">
+                                        {subcategory.productCount}
+                                      </span>
+                                    </a>
+                                  ))
+                                ) : (
+                                  <div className="text-xs text-gray-400">
+                                    No collections available
+                                  </div>
+                                )}
                               </div>
                             </div>
 

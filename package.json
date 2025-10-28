@@ -14,7 +14,8 @@
     "db:schedule": "tsx scripts/nightly-updater.ts",
     "db:build-aesthetic": "tsx scripts/build-aesthetic-db.ts",
     "db:analyze-aesthetics": "tsx scripts/analyze-product-aesthetics.ts",
-    "db:analyze-vision": "tsx scripts/analyze-products-with-vision.ts"
+    "db:analyze-vision": "tsx scripts/analyze-products-with-vision.ts",
+    "db:extract-subcategories": "tsx scripts/extract-subcategories.ts"
   },
   "dependencies": {
     "@chroma-core/default-embed": "^0.1.8",
